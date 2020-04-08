@@ -1,11 +1,13 @@
 import numpy as np
 
 class ClassesAndResources:
-    def __init__(self, school, groups, specialists, locals, tutors):
+    def __init__(self, school, groups, specialists, locals, customConstraints):
         self.school = school
         self.groups = groups
         self.specialists = specialists
         self.locals = locals
+        self.customConstraints = customConstraints
+        
         self.groupsNeeds = np.stack(map(lambda group: group.needsBySubject, groups), axis=0)
         self.premises = set()
         self.premiseByLocal = np.asarray([local.premise for local in locals])
@@ -25,6 +27,14 @@ class ClassesAndResources:
         self.maxLevel = np.max(list(map(lambda group: group.level, groups)))
 
         self.levelByGroup = np.asarray([group.level for group in groups])
+
+        self.tutorFreePeriods = np.stack(map(lambda group: group.tutorFreePeriods, groups)).astype(np.bool)
+
+    def getDepthCost(self, solutionInstance, depth):
+        if depth in self.customConstraints:
+            return self.customConstraints[depth](solutionInstance)
+        else:
+            return 0
 
     def toString(self):
         return self.school.toString() + """

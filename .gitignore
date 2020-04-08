@@ -1,3 +1,10 @@
+# Statistic files
+badNeighbourTypes.json
+depths.json
+equalNeighbourTypes.json
+goodNeighbourTypes.json
+realBadNeighbourTypes.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
