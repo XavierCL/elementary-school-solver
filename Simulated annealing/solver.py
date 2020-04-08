@@ -1,10 +1,10 @@
 import solutionInstance
 import time
-import copy
 import numpy as np
 import random
 import math
 import json
+
 
 def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temperatureDecreaseRate):
 
@@ -33,7 +33,7 @@ def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temp
         while time.time() * 1000. < startTime + msToSpend and depth <= lastSolution.maxDepth:
             depthStats.append(time.time())
             lastSolutionCost = lastSolution.getTotalCost()
-            temperature = initialTemperature
+#            temperature = initialTemperature
             while time.time() * 1000. < startTime + msToSpend and not lastSolutionCost.isPerfect():
                 (neighbourType, neighbourSolution) = lastSolution.getNeighbour(depth)
                 generatedNeighbours += 1
@@ -57,7 +57,8 @@ def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temp
                         bestSolution = neighbourSolution
                         temperature *= temperatureDecreaseRate
                     else:
-                        if neighbourCost.magnitude() == lastSolutionCost.magnitude() and random.uniform(0, 1) <= math.e**(-(neighbourCost.highestMagnitude() - lastSolutionCost.highestMagnitude())/temperature):
+                        if neighbourCost.magnitude() == lastSolutionCost.magnitude() and random.uniform(0, 1) <= \
+                                math.e**(-(neighbourCost.highestMagnitude() - lastSolutionCost.highestMagnitude())/temperature):
                             badNeighbourStats[neighbourType].append(time.time())
                             
                             if neighbourCost.highestMagnitude() != lastSolutionCost.highestMagnitude():
@@ -70,17 +71,22 @@ def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temp
                         else:
                             realBadNeighbourStats[neighbourType].append(time.time())
             depth+=1
-    except:
+    except KeyboardInterrupt:
         pass
 
-    with open("goodNeighbourTypes.json", "w") as outfile:
+    with open("Good_neighbour_generated.json", "w") as outfile:
         outfile.write(json.dumps(goodNeighbourStats))
-    with open("equalNeighbourTypes.json", "w") as outfile:
+    with open("Equal_neighbour_generated.json", "w") as outfile:
         outfile.write(json.dumps(equalNeighbourStats))
-    with open("badNeighbourTypes.json", "w") as outfile:
+    with open("Bad_neighbour_generated.json", "w") as outfile:
         outfile.write(json.dumps(badNeighbourStats))
-    with open("realBadNeighbourTypes.json", "w") as outfile:
+    with open("Real_bad_neighbour_generated.json", "w") as outfile:
         outfile.write(json.dumps(realBadNeighbourStats))
+    with open("No_neighbour_generated.json", "w") as outfile:
+        outfile.write(json.dumps(noNeighbourStats))
+        print(len(noNeighbourStats), "noNeighbourTypes.json")
+        for n in noNeighbourStats:
+            print(len(n))
     with open("depths.json", "w") as outfile:
         outfile.write(json.dumps(depthStats))
 

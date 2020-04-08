@@ -101,10 +101,10 @@ def frankClassesInstance():
 
     specialists = [
         Specialist(0, "Anglais", englishSpecialistFreePeriods),
-        Specialist(1, "Frank (musique) gr2.06-4.11(Mousserons) gr5.12+(Alizés)", frankSpecialistFreePeriods),
-        Specialist(2, "Musique (29% gr2.05 et moins)", otherMusicSpecialistFreePeriods),
-        Specialist(3, "Éduc 1 (Alizés gr3.08 et moins)", all_period_available()),
-        Specialist(4, "Éduc 2 (Mousserons + gr3.09)", all_period_available()),
+        Specialist(1, "Frank (musique) gr06-12(Mousserons) gr13+(Alizés)", frankSpecialistFreePeriods),
+        Specialist(2, "Musique (29% gr06 et moins)", otherMusicSpecialistFreePeriods),
+        Specialist(3, "Éduc 1 (Alizés gr09 et moins)", all_period_available()),
+        Specialist(4, "Éduc 2 (Mousserons + gr3.1)", all_period_available()),
         Specialist(5, "Science teacher (dispo J2-J8 PM, J5 AM)", scienceSpecialistFreePeriods)
     ]
 

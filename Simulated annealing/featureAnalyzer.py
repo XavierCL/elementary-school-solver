@@ -1,45 +1,75 @@
-import zipfile
 import json
-import os
-import random
 import matplotlib.pyplot as plt
 import numpy as np
 
-def plotNumericFeatures(featureName, xCoupling=None):
-    featuresFile = open(featureName + ".json", "r")
-    featuresData = featuresFile.read()
-    featuresFile.close()
-    features = json.loads(featuresData)
+def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
+    featureNameIndex = 0
+    neighbourTypeNames = ["+/- meeting w/ specialist",
+                          "swap random P",
+                          "swap days",
+                          "swap adjacent P",
+                          "swap close P",
+                          "swap diagonal P",
+                          "swap P within day",
+                          "swap P 3 days apart",
+                          "multiple swaps"]
 
-    for neighbourType, times in enumerate(features):
+    fig, ax = plt.subplots(nrows=2, ncols=2)
+    row_index = 0
+    for row in ax:
+        col_index = 0
+        for col in row:
+            featureName = featureNames[featureNameIndex]
+            featuresFile = open(featureName + ".json", "r")
+            featuresData = featuresFile.read()
+            featuresFile.close()
+            features = json.loads(featuresData)
+            featureNameIndex += 1
 
-        if len(times) == 0:
-            continue
+            for neighbourType, times in enumerate(features):
 
-        data = np.zeros((len(times), 2))
-        observationIndex = 0
+                if len(times) == 0:
+                    continue
 
-        for timed in times:
-            data[observationIndex, 0] = timed
-            data[observationIndex, 1] = 1.
-            observationIndex+=1
+                data = np.zeros((len(times), 2))
+                observationIndex = 0
 
-        if xCoupling != None:
-            minX = np.amin(data[:,0])
-            maxX = np.amax(data[:,0])
-            couplingSize = (maxX - minX) / xCoupling
+                for timed in times:
+                    data[observationIndex, 0] = timed
+                    data[observationIndex, 1] = 1.
+                    observationIndex+=1
 
-            coupledData = np.zeros((xCoupling, 2))
+                if xCoupling != None:
+                    minX = np.amin(data[:,0])
+                    maxX = np.amax(data[:,0])
+                    couplingSize = (maxX - minX) / xCoupling
+                    coupledData = np.zeros((xCoupling, 2))
 
-            for couplingIndex in range(xCoupling):
-                coupledData[couplingIndex, 0] = minX + (couplingIndex + 0.5) * couplingSize
-                coupledData[couplingIndex, 1] = np.sum(data[np.logical_and(minX + couplingIndex * couplingSize <= data[:,0], data[:,0] < minX + (couplingIndex + 1) * couplingSize)][:,1])
+                    for couplingIndex in range(xCoupling):
+                        coupledData[couplingIndex, 0] = minX + (couplingIndex + 0.5) * couplingSize
+                        coupledData[couplingIndex, 1] = \
+                            np.sum(data[np.logical_and(minX + couplingIndex * couplingSize <= data[:,0],
+                                                       data[:,0] < minX + (couplingIndex + 1) * couplingSize)][:,1])
+                    numberOfChanges = len(data)
+                    data = coupledData
+                my_label = (str(numberOfChanges) + " " + neighbourTypeNames[neighbourType])
+                ax[row_index, col_index].set_xlabel("seconds")
+                if cumul:
+                    cumulative = np.cumsum(data[:,1])
+                    col.plot(data[:,0] - minX, cumulative, label=my_label)
+                else:
+                    col.plot(data[:,0] - minX, data[:,1], label=my_label)
+                ax[row_index, col_index].set_title(featureName)
+                ax[row_index, col_index].legend()
+            fig.suptitle('Neighbours generated through time')
+            col_index += 1
+        row_index += 1
 
-            data = coupledData
 
-        plt.plot(data[:,0], data[:,1], "C" + str(neighbourType), label='Neighbour type ' + str(neighbourType))
-
-plotNumericFeatures("goodNeighbourTypes",80)
-
-plt.legend(loc="upper left")
+featureNames = ["Real_bad_neighbour_generated",
+                "Bad_neighbour_generated",
+                "Equal_neighbour_generated",
+                "Good_neighbour_generated"]
+cumulativeDisplay = True
+plotNumericFeatures(featureNames, cumulativeDisplay, 30)
 plt.show()
