@@ -6,6 +6,30 @@ from problemInstances import school1
 import numpy as np
 
 
+def getFrankHalfTimeTutorHardCost(solutionInstance):
+    # Penalizes every time an AM where an absent tutor does not have two periods without specialist
+    # Penalizes every time a PM where an absent tutor does not have two periods without specialist
+
+    cost = 0
+
+    fullDayNonFreeTutors = np.sum(solutionInstance.classesAndResources.tutorFreePeriods, axis=2) == 0
+    amNonFreeTutors = np.logical_and(np.sum(solutionInstance.classesAndResources.tutorFreePeriods[..., :solutionInstance.classesAndResources.school.periodsInAm], axis=2) == 0, ~fullDayNonFreeTutors)
+    pmNonFreeTutors = np.logical_and(np.sum(solutionInstance.classesAndResources.tutorFreePeriods[..., solutionInstance.classesAndResources.school.periodsInAm:], axis=2) == 0, ~fullDayNonFreeTutors)
+
+    meetByPeriodByDayByGroup = np.sum(solutionInstance.meetByPeriodByDayBySpecialistByGroup, axis=1)
+
+    # Full day absent tutor must have 1 speciality
+    cost += np.sum((np.sum(meetByPeriodByDayByGroup, axis=2)[fullDayNonFreeTutors] - 1)**2)
+
+    # AM day absent tutor must have 1 speciality
+    cost += np.sum((np.sum(meetByPeriodByDayByGroup[..., :solutionInstance.classesAndResources.school.periodsInAm], axis=2)[amNonFreeTutors] - 1)**2)
+
+    # PM day absent tutor must have 0 speciality
+    cost += np.sum((np.sum(meetByPeriodByDayByGroup[..., solutionInstance.classesAndResources.school.periodsInAm:], axis=2)[pmNonFreeTutors] - 1)**2)
+
+    return cost
+
+
 def isaBaronClassesInstance():
     school = school1.school1Instance()
 
@@ -33,33 +57,33 @@ def isaBaronClassesInstance():
     cinquiemeEmilieDispos[[0]] = False
 
     groups = [
-        Group(0, "Présco Emmanuelle", 0, np.asarray([2, 0, 0, 0, 0, 0])),
-        Group(1, "Présco Véro/Josée", 0, np.asarray([0, 2, 0, 0, 0, 0])),
-        Group(2, "Présco Mélanie", 0, np.asarray([0, 2, 0, 0, 0, 0])),
+        Group(0, "Présco Emmanuelle", 0, np.asarray([2, 0, 0, 0, 0, 0]), enseignantTempsPleinDispos),
+        Group(1, "Présco Véro/Josée", 0, np.asarray([0, 2, 0, 0, 0, 0]), enseignantTempsPleinDispos),
+        Group(2, "Présco Mélanie", 0, np.asarray([0, 2, 0, 0, 0, 0]), prescoMelanieDispos),
 
-        Group(3, "1e Cathy", 1, np.asarray([0, 4, 3, 0, 0, 2])),
-        Group(4, "1e Julie", 1, np.asarray([0, 4, 3, 0, 0, 2])),
-        Group(5, "1e Mélanie", 1, np.asarray([0, 4, 3, 0, 0, 2])),
+        Group(3, "1e Cathy", 1, np.asarray([0, 4, 3, 0, 0, 2]), premiereCathyDispos),
+        Group(4, "1e Julie", 1, np.asarray([0, 4, 3, 0, 0, 2]), enseignantTempsPleinDispos),
+        Group(5, "1e Mélanie", 1, np.asarray([0, 4, 3, 0, 0, 2]), premiereMelanieDispos),
 
-        Group(6, "2e Sandra", 2, np.asarray([4, 0, 3, 0, 0, 2])),
-        Group(7, "2e Ingrid", 2, np.asarray([4, 0, 3, 0, 0, 2])),
+        Group(6, "2e Sandra", 2, np.asarray([4, 0, 3, 0, 0, 2]), enseignantTempsPleinDispos),
+        Group(7, "2e Ingrid", 2, np.asarray([4, 0, 3, 0, 0, 2]), deuxiemeIngridDispos),
 
-        Group(8, "2-3e Marie-Claude", 2.5, np.asarray([4, 0, 3, 0, 0, 2])),
+        Group(8, "2-3e Marie-Claude", 2.5, np.asarray([4, 0, 3, 0, 0, 2]), deuxEtTroisMarieClaudeDispos),
 
-        Group(9, "3e Isabelle", 3, np.asarray([4, 0, 3, 0, 0, 2])),
-        Group(10, "3e Lisa", 3, np.asarray([4, 0, 3, 0, 0, 2])),
+        Group(9, "3e Isabelle", 3, np.asarray([4, 0, 3, 0, 0, 2]), troisiemeIsabelleDispos),
+        Group(10, "3e Lisa", 3, np.asarray([4, 0, 3, 0, 0, 2]), enseignantTempsPleinDispos),
 
-        Group(11, "3-4e Émilie", 3.5, np.asarray([0, 4, 3, 0, 0, 2])),
+        Group(11, "3-4e Émilie", 3.5, np.asarray([0, 4, 3, 0, 0, 2]), enseignantTempsPleinDispos),
 
-        Group(12, "4e Janie", 4, np.asarray([0, 4, 3, 0, 0, 2])),
-        Group(13, "4e Sandra", 4, np.asarray([0, 4, 3, 0, 0, 2])),
+        Group(12, "4e Janie", 4, np.asarray([0, 4, 3, 0, 0, 2]), enseignantTempsPleinDispos),
+        Group(13, "4e Sandra", 4, np.asarray([0, 4, 3, 0, 0, 2]), enseignantTempsPleinDispos),
 
-        Group(14, "5e Caroline", 5, np.asarray([4, 0, 0, 3, 2, 0])),
-        Group(15, "5e Émilie", 5, np.asarray([4, 0, 0, 3, 2, 0])),
-        Group(16, "5e Josée", 5, np.asarray([4, 0, 0, 3, 2, 0])),
+        Group(14, "5e Caroline", 5, np.asarray([4, 0, 0, 3, 2, 0]), enseignantTempsPleinDispos),
+        Group(15, "5e Émilie", 5, np.asarray([4, 0, 0, 3, 2, 0]), cinquiemeEmilieDispos),
+        Group(16, "5e Josée", 5, np.asarray([4, 0, 0, 3, 2, 0]), enseignantTempsPleinDispos),
 
-        Group(17, "6e Émilie", 6, np.asarray([4, 0, 3, 0, 2, 0])),
-        Group(18, "6e Corinne", 6, np.asarray([4, 0, 3, 0, 2, 0])),
+        Group(17, "6e Émilie", 6, np.asarray([4, 0, 3, 0, 2, 0]), enseignantTempsPleinDispos),
+        Group(18, "6e Corinne", 6, np.asarray([4, 0, 3, 0, 2, 0]), enseignantTempsPleinDispos),
     ]
 
     educ2FreePeriods = all_period_available()
@@ -118,4 +142,4 @@ def isaBaronClassesInstance():
         Local(5, "Musique", 0, {3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}, {5})
     ]
 
-    return ClassesAndResources(school, groups, specialists, locals)
+    return ClassesAndResources(school, groups, specialists, locals, {1: getFrankHalfTimeTutorHardCost})
