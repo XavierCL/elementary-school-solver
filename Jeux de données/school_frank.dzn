@@ -1,0 +1,51 @@
+% NB_EMPLOYES est le nombre d'employes.
+% NB_ACTIVITES est le nombre d'activites
+% NB_PERIODES est le nombre de periodes de 15 minutes a planifier
+% demande est une matrice de dimensions NB_PERIODES x NB_ACTIVITES donnant le nombre employes demandes pour une activite donnee a un temps donne.
+% surcout est une matrice de dimensions NB_PERIODES x NB_ACTIVITES donnant la penalite pour avoir un employe de plus que la demande pour une activite et un instant donne.
+% souscout est une matrice de dimensions NB_PERIODES x NB_ACTIVITES donnant la penalite pour avoir un employe de moins que la demande pour une activite et un instant donne.
+
+JOURS_CYCLE = 10;
+PERIODES_JOUR = 5;
+SPECIALISTES = 5; % 1-anglais, 2-musique (Frank), 3-musique(29% de tâche), 4-éduc(alizé), 5-éduc(mousseron)
+NIVEAUX = 8;
+MAX_GROUPES = 3;
+TEMPS_PLEIN = 41;
+SPECIALITES_PAR_GROUPE = 9;
+
+% pénalité pour 2e journée pour un tuteur
+% répartition des périodes libres
+% un groupe de 3e et 5+ = temps plein d'éduc
+% un groupe de 2 et 3+ = 33 périodes de musique
+DEMANDE = [||0, 0, 2, 2, 0|0, 0, 1, 2, 0| 0, 0, 1, 2, 0|, % maternelles
+            |2, 0, 3, 4, 0|2, 0, 3, 4, 0| 0, 0, 0, 0, 0|, % 1e année, seulement 2 groupes
+            |2, 0, 3, 4, 0|2, 3, 0, 4, 0| 0, 0, 0, 0, 0|, % 2e année
+            |2, 3, 0, 4, 0|2, 3, 0, 4, 0| 2, 3, 0, 0, 4|, % 3e année
+            |3, 2, 0, 4, 0|3, 2, 0, 4, 0| 0, 0, 0, 0, 0|, % 4e année
+            |3, 2, 0, 0, 4|3, 2, 0, 0, 4| 3, 2, 0, 0, 4|, % 5e année - le 3e groupe est un groupe de 5 et 6
+            |0, 2, 0, 0, 4|0, 2, 0, 0, 4| 0, 0, 0, 0, 0|, % 6e année
+            |1, 2, 0, 0, 6|1, 2, 0, 0, 6| 1, 3, 0, 0, 5||]; %adaptation
+
+PAVILLONS = [|1,1,1| % maternelles à 4e année, pavillon Alizés
+             1,1,0|
+             1,1,0|
+             1,1,1|
+             1,1,0|
+             2,2,2|% 5e, 6e année et adaptation, pavillon Mousseron
+             2,2,0|
+             2,2,2|];           
+
+DISPOS_SPECIALISTES = [||1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|0,0,0,0,0|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|0,0,0,0,0|,
+                        |1,1,1,1,1|0,0,0,0,0|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|0,0,0,0,0|1,1,1,1,1|1,1,1,1,1|,
+                        |0,0,0,0,0|1,1,1,1,1|0,0,0,0,0|0,0,0,0,0|1,1,1,1,1|0,0,0,0,0|0,0,0,0,0|1,1,1,1,1|0,0,0,0,0|0,0,0,0,0|,
+                        |1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|,
+                        |1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1||];
+
+DISPOS_TUTEURS = [|1,1,1,1,1,1,1,1,1,1|1,1,1,1,1,1,1,1,1,1|1,1,1,1,1,1,1,1,1,1
+                  |1,1,1,1,1,1,1,1,1,1|1,1,1,1,1,1,1,1,1,1|1,1,1,1,1,1,1,1,1,1
+                  |1,1,1,1,1,1,1,1,1,1|1,1,1,1,1,1,1,1,1,1|1,1,1,1,1,1,1,1,1,1
+                  |1,1,1,1,1,1,1,1,1,1|1,1,1,1,1,1,1,1,1,1|1,1,1,1,1,1,1,1,1,1
+                  |1,1,1,1,1,1,1,1,1,1|1,1,1,1,1,1,1,1,1,1|1,1,1,1,1,1,1,1,1,1
+                  |1,1,1,1,1,1,1,1,1,1|1,1,1,1,1,1,1,1,1,1|1,1,1,1,1,1,1,1,1,1
+                  |1,1,1,1,1,1,1,1,1,1|1,1,1,1,1,1,1,1,1,1|1,1,1,1,1,1,1,1,1,1
+                  |1,1,1,1,1,1,1,1,1,1|1,1,1,1,1,1,1,1,1,1|1,1,1,1,1,1,1,1,1,1|];

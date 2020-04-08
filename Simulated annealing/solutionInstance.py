@@ -1,0 +1,411 @@
+from solutionCost import SolutionCost
+import random
+import copy
+import numpy as np
+
+class SolutionInstance:
+
+    def __init__(self, classesAndResources, meetByPeriodByDayByLocalBySubjectByGroup):
+        self.classesAndResources = classesAndResources
+        self.meetByPeriodByDayByLocalBySubjectByGroup = meetByPeriodByDayByLocalBySubjectByGroup
+
+        self.maxDepth = 2
+        self.neighbourTypeCount = 4
+
+    def getTotalCost(self):
+        meetByPeriodByDayBySpecialistByGroup = np.sum(self.meetByPeriodByDayByLocalBySubjectByGroup, axis=2) != 0
+        hardConstraintViolationCount = self.getHardConstraintCost(meetByPeriodByDayBySpecialistByGroup)
+        meetArgs = np.where(self.meetByPeriodByDayByLocalBySubjectByGroup)
+        premiseConstraintViolationCount = self.getPremiseConstraintCost(meetArgs)
+        (softiesConstraintViolationCount, softiesDetails) = self.getSoftConstraintCost(meetArgs, meetByPeriodByDayBySpecialistByGroup)
+
+        return SolutionCost(np.asarray([hardConstraintViolationCount, premiseConstraintViolationCount, softiesConstraintViolationCount]), softiesDetails)
+
+    def getHardConstraintCost(self, meetByPeriodByDayBySpecialistByGroup):
+        hardConstraintViolationCount = 0
+        hardConstraintViolationCount += self.groupNeedsHardConstraintViolationCost(meetByPeriodByDayBySpecialistByGroup)
+        hardConstraintViolationCount += self.singleSpecialistByGroupPeriodViolationCost(meetByPeriodByDayBySpecialistByGroup)
+        hardConstraintViolationCount += self.singleGroupByFreeSpecialistPeriodViolationCost(meetByPeriodByDayBySpecialistByGroup)
+        hardConstraintViolationCount += self.singleLocalOccupancyViolationCost()
+
+        # Locals only see groups and specialists they are supposed to
+        # Expected not to happen by neighbour generation
+
+        return hardConstraintViolationCount
+
+    def groupNeedsHardConstraintViolationCost(self, meetByPeriodByDayBySpecialistByGroup):
+        # Every group need has been fulfilled
+        return np.sum(np.abs(np.sum(meetByPeriodByDayBySpecialistByGroup, axis=(2, 3)) - self.classesAndResources.groupsNeeds))
+
+    def singleSpecialistByGroupPeriodViolationCost(self, meetByPeriodByDayBySpecialistByGroup):
+        # No groups see a specialist twice at the same period
+        return np.sum(np.sum(meetByPeriodByDayBySpecialistByGroup, axis=1) > 1)
+
+    def singleGroupByFreeSpecialistPeriodViolationCost(self, meetByPeriodByDayBySpecialistByGroup):
+        # No specialists see more than a group when they are free
+        specialistMeetDiffWithFreePeriods = np.sum(meetByPeriodByDayBySpecialistByGroup, axis=0) - self.classesAndResources.specialistsFreePeriods
+        return np.sum(specialistMeetDiffWithFreePeriods[specialistMeetDiffWithFreePeriods > 0])
+
+    def singleLocalOccupancyViolationCost(self):
+        # No local see people twice at the same period
+        return np.sum(np.sum(self.meetByPeriodByDayByLocalBySubjectByGroup, axis=(0, 1)) > 1)
+
+    def getPremiseConstraintCost(self, meetArgs):
+
+        premiseConstraintViolationCount = 0
+
+        # Two different premises cannot be one period after the other (except at noon)
+        meetByPeriodByDayByPremiseBySpecialist = np.zeros((self.meetByPeriodByDayByLocalBySubjectByGroup.shape[1], self.classesAndResources.premiseCount, self.meetByPeriodByDayByLocalBySubjectByGroup.shape[3], self.meetByPeriodByDayByLocalBySubjectByGroup.shape[4])).astype(np.bool)
+        meetByPeriodByDayByPremiseBySpecialist[meetArgs[1], self.classesAndResources.premiseByLocal[meetArgs[2]], meetArgs[3], meetArgs[4]] = True
+        for firstClosePeriod in range(self.classesAndResources.school.periodsInAm - 1):
+            premiseConstraintViolationCount += np.sum(np.sum(np.sum(meetByPeriodByDayByPremiseBySpecialist[...,firstClosePeriod:firstClosePeriod+2], axis=3) >= 1, axis=1) > 1)
+        for firstClosePeriod in range(self.classesAndResources.school.periodsInPm - 1):
+            firstClosePeriod += self.classesAndResources.school.periodsInAm
+            premiseConstraintViolationCount += np.sum(np.sum(np.sum(meetByPeriodByDayByPremiseBySpecialist[...,firstClosePeriod:firstClosePeriod+2], axis=3) >= 1, axis=1) > 1)
+
+        return premiseConstraintViolationCount
+
+    def getSoftConstraintCost(self, meetArgs, meetByPeriodByDayBySpecialistByGroup):
+        tutorFreePeriodsAcrossTheDaysCost = self.getTutorFreePeriodsAcrossDaysCost(meetByPeriodByDayBySpecialistByGroup)
+        tutorFreePeriodsAcrossThePeriodsCost = self.getTutorFreePeriodsAcrossPeriodsCost(meetByPeriodByDayBySpecialistByGroup)
+        tutorFreePeriodsAcrossTheBoard = self.getTutorFreePeriodsAcrossTheBoardCost(meetByPeriodByDayBySpecialistByGroup)
+        # groupsSubjectPeriodsAcrossTheDaysCost = self.getGroupsSubjectsAcrossTheDaysCost(meetByPeriodByDayBySpecialistByGroup)
+        groupsSubjectPeriodsAcrossThePeriodsCost = self.getGroupsSubjectsAcrossThePeriodsCost(meetByPeriodByDayBySpecialistByGroup)
+        groupsSubjectPeriodsAcrossTheBoardCost = self.getGroupsSubjectsAcrossTheBoardCost(meetByPeriodByDayBySpecialistByGroup)
+        teachSameLevelsTogetherCost = self.getTeachSameLevelsTogetherCost(meetArgs)
+
+        return ((tutorFreePeriodsAcrossTheDaysCost * 1000 + tutorFreePeriodsAcrossThePeriodsCost + tutorFreePeriodsAcrossTheBoard + groupsSubjectPeriodsAcrossThePeriodsCost + groupsSubjectPeriodsAcrossTheBoardCost + teachSameLevelsTogetherCost) / 1_500_000, [tutorFreePeriodsAcrossTheDaysCost, tutorFreePeriodsAcrossThePeriodsCost, tutorFreePeriodsAcrossTheBoard, groupsSubjectPeriodsAcrossThePeriodsCost, groupsSubjectPeriodsAcrossTheBoardCost, teachSameLevelsTogetherCost])
+
+    def getTutorFreePeriodsAcrossDaysCost(self, meetByPeriodByDayBySpecialistByGroup):
+        # Disperse a tutor free periods across the days
+        meetByPeriodByDayByGroup = np.sum(meetByPeriodByDayBySpecialistByGroup, axis=1)
+        meetArgsByPeriodByDayByGroup = np.where(meetByPeriodByDayByGroup)
+        daysByGroup = meetArgsByPeriodByDayByGroup[1]
+        shiftedDaysByGroup = np.roll(daysByGroup, 1)
+        groups = meetArgsByPeriodByDayByGroup[0]
+        shiftedGroups = np.roll(groups, 1)
+        groupsStarts = groups != shiftedGroups
+        groupsWhereStarts = np.where(groupsStarts)[0]
+        shiftedGroupsWhereStarts = np.roll(groupsWhereStarts, -1)
+        shiftedDaysByGroup[groupsWhereStarts] = shiftedDaysByGroup[shiftedGroupsWhereStarts] - self.classesAndResources.school.daysInCycle
+        return np.sum((daysByGroup - shiftedDaysByGroup).astype(np.float64)**4)
+
+    def getTutorFreePeriodsAcrossPeriodsCost(self, meetByPeriodByDayBySpecialistByGroup):
+        # Disperse a tutor free periods across the periods
+        meetByDayByPeriodByGroup = np.swapaxes(np.sum(meetByPeriodByDayBySpecialistByGroup, axis=1), 1, 2)
+        meetArgsByDayByPeriodByGroup = np.where(meetByDayByPeriodByGroup)
+        periodsByGroup = meetArgsByDayByPeriodByGroup[1]
+        shiftedPeriodsByGroup = np.roll(periodsByGroup, 1)
+        groups = meetArgsByDayByPeriodByGroup[0]
+        shiftedGroups = np.roll(groups, 1)
+        groupsStarts = groups != shiftedGroups
+        groupsWhereStarts = np.where(groupsStarts)[0]
+        shiftedGroupsWhereStarts = np.roll(groupsWhereStarts, -1)
+        shiftedPeriodsByGroup[groupsWhereStarts] = shiftedPeriodsByGroup[shiftedGroupsWhereStarts] - self.classesAndResources.school.periodsInDay
+        return np.sum((periodsByGroup - shiftedPeriodsByGroup).astype(np.float64)**3)
+
+    def getTutorFreePeriodsAcrossTheBoardCost(self, meetByPeriodByDayBySpecialistByGroup):
+        # Disperse a tutor free periods across the board
+        meetByDayAndPeriodByGroup = np.sum(meetByPeriodByDayBySpecialistByGroup, axis=1).reshape(meetByPeriodByDayBySpecialistByGroup.shape[0], -1)
+        meetArgsByDayAndPeriodByGroup = np.where(meetByDayAndPeriodByGroup)
+        daysAndPeriodsByGroup = meetArgsByDayAndPeriodByGroup[1]
+        shiftedDaysAndPeriodsByGroup = np.roll(daysAndPeriodsByGroup, 1)
+        groups = meetArgsByDayAndPeriodByGroup[0]
+        shiftedGroups = np.roll(groups, 1)
+        groupsStarts = groups != shiftedGroups
+        groupsWhereStarts = np.where(groupsStarts)[0]
+        shiftedGroupsWhereStarts = np.roll(groupsWhereStarts, -1)
+        shiftedDaysAndPeriodsByGroup[groupsWhereStarts] = shiftedDaysAndPeriodsByGroup[shiftedGroupsWhereStarts] - (self.classesAndResources.school.periodsInDay * self.classesAndResources.school.daysInCycle)
+        return np.sum((daysAndPeriodsByGroup - shiftedDaysAndPeriodsByGroup).astype(np.float64)**3)
+
+    def getGroupsSubjectsAcrossTheDaysCost(self, meetByPeriodByDayBySpecialistByGroup):
+        # Disperse a group's single subject across the days
+        meetByPeriodByDayBySpecialistAndGroup = meetByPeriodByDayBySpecialistByGroup.reshape((-1, self.meetByPeriodByDayByLocalBySubjectByGroup.shape[3], self.meetByPeriodByDayByLocalBySubjectByGroup.shape[4]))
+        meetArgsByPeriodByDayBySpecialistAndGroup = np.where(meetByPeriodByDayBySpecialistAndGroup)
+        daysBySpecialistAndGroup = meetArgsByPeriodByDayBySpecialistAndGroup[1]
+        shiftedDaysBySpecialistAndGroup = np.roll(daysBySpecialistAndGroup, 1)
+        specialistsAndGroups = meetArgsByPeriodByDayBySpecialistAndGroup[0]
+        shiftedSpecialistsAndGroups = np.roll(specialistsAndGroups, 1)
+        specialistsAndGroupsStarts = specialistsAndGroups != shiftedSpecialistsAndGroups
+        specialistsAndGroupsWhereStarts = np.where(specialistsAndGroupsStarts)[0]
+        shiftedSpecialistsAndGroupsWhereStarts = np.roll(specialistsAndGroupsWhereStarts, -1)
+        shiftedDaysBySpecialistAndGroup[specialistsAndGroupsWhereStarts] = shiftedDaysBySpecialistAndGroup[shiftedSpecialistsAndGroupsWhereStarts] - self.classesAndResources.school.daysInCycle
+        return np.sum((daysBySpecialistAndGroup - shiftedDaysBySpecialistAndGroup).astype(np.float64)**4)
+
+    def getGroupsSubjectsAcrossThePeriodsCost(self, meetByPeriodByDayBySpecialistByGroup):
+        # Disperse a group's single subject across the periods
+        meetByDayByPeriodBySpecialistAndGroup = np.swapaxes(meetByPeriodByDayBySpecialistByGroup, 2, 3).reshape((-1, self.meetByPeriodByDayByLocalBySubjectByGroup.shape[4], self.meetByPeriodByDayByLocalBySubjectByGroup.shape[3]))
+        meetArgsByDayByPeriodBySpecialistAndGroup = np.where(meetByDayByPeriodBySpecialistAndGroup)
+        periodsBySpecialistAndGroup = meetArgsByDayByPeriodBySpecialistAndGroup[1]
+        shiftedPeriodsBySpecialistAndGroup = np.roll(periodsBySpecialistAndGroup, 1)
+        specialistsAndGroups = meetArgsByDayByPeriodBySpecialistAndGroup[0]
+        shiftedSpecialistsAndGroups = np.roll(specialistsAndGroups, 1)
+        specialistsAndGroupsStarts = specialistsAndGroups != shiftedSpecialistsAndGroups
+        specialistsAndGroupsWhereStarts = np.where(specialistsAndGroupsStarts)[0]
+        shiftedSpecialistsAndGroupsWhereStarts = np.roll(specialistsAndGroupsWhereStarts, -1)
+        shiftedPeriodsBySpecialistAndGroup[specialistsAndGroupsWhereStarts] = shiftedPeriodsBySpecialistAndGroup[shiftedSpecialistsAndGroupsWhereStarts] - self.classesAndResources.school.periodsInDay
+        return np.sum((periodsBySpecialistAndGroup - shiftedPeriodsBySpecialistAndGroup).astype(np.float64)**3)
+
+    def getGroupsSubjectsAcrossTheBoardCost(self, meetByPeriodByDayBySpecialistByGroup):
+        # Disperse a group's single subject across the board
+        meetByDayAndPeriodBySpecialistAndGroup = meetByPeriodByDayBySpecialistByGroup.reshape(meetByPeriodByDayBySpecialistByGroup.shape[0] * meetByPeriodByDayBySpecialistByGroup.shape[1], -1)
+        meetArgsByDayAndPeriodBySpecialistAndGroup = np.where(meetByDayAndPeriodBySpecialistAndGroup)
+        daysAndPeriodsBySpecialistAndGroup = meetArgsByDayAndPeriodBySpecialistAndGroup[1]
+        shiftedDaysAndPeriodsBySpecialistAndGroup = np.roll(daysAndPeriodsBySpecialistAndGroup, 1)
+        specialistsAndGroups = meetArgsByDayAndPeriodBySpecialistAndGroup[0]
+        shiftedSpecialistAndGroup = np.roll(specialistsAndGroups, 1)
+        specialistsAndGroupsStarts = specialistsAndGroups != shiftedSpecialistAndGroup
+        specialistsAndGroupsWhereStarts = np.where(specialistsAndGroupsStarts)[0]
+        shiftedSpecialistsAndGroupsWhereStarts = np.roll(specialistsAndGroupsWhereStarts, -1)
+        shiftedDaysAndPeriodsBySpecialistAndGroup[specialistsAndGroupsWhereStarts] = shiftedDaysAndPeriodsBySpecialistAndGroup[shiftedSpecialistsAndGroupsWhereStarts] - (self.classesAndResources.school.periodsInDay * self.classesAndResources.school.daysInCycle)
+        return np.sum((daysAndPeriodsBySpecialistAndGroup - shiftedDaysAndPeriodsBySpecialistAndGroup).astype(np.float64)**3)
+
+    def getTeachSameLevelsTogetherCost(self, meetArgs):
+        # Group together same years for specialists
+        groupTogetherSameYearCost = 0.
+        levelByPeriodByDayBySpecialist = np.ones((self.meetByPeriodByDayByLocalBySubjectByGroup.shape[1], self.meetByPeriodByDayByLocalBySubjectByGroup.shape[3], self.meetByPeriodByDayByLocalBySubjectByGroup.shape[4])) * self.classesAndResources.maxLevel
+        levelByPeriodByDayBySpecialist[meetArgs[1], meetArgs[3], meetArgs[4]] = self.classesAndResources.levelByGroup[meetArgs[0]]
+        for firstClosePeriod in range(self.classesAndResources.school.periodsInAm - 1):
+            groupTogetherSameYearCost += np.sum(levelByPeriodByDayBySpecialist[..., firstClosePeriod] != levelByPeriodByDayBySpecialist[..., firstClosePeriod + 1])
+        for firstClosePeriod in range(self.classesAndResources.school.periodsInPm - 1):
+            firstClosePeriod += self.classesAndResources.school.periodsInAm
+            groupTogetherSameYearCost += np.sum(levelByPeriodByDayBySpecialist[..., firstClosePeriod] != levelByPeriodByDayBySpecialist[..., firstClosePeriod + 1])
+        return groupTogetherSameYearCost**2
+
+    def getNeighbour(self, depth):
+        if depth == 0:
+            neighbourChoice = random.choice([0, 1, 2, 3])
+            if neighbourChoice == 0:
+                # Mandatory neighbour choice, adds the right classes, but still generates goods
+                return (0, self.addOrRemoveGroupMeetingWithSpecialist())
+            elif neighbourChoice == 1:
+                # good neighbour choice
+                return (1, self.swapSpecialistTwoPeriods())
+            elif neighbourChoice == 2:
+                # Poor neighbour choice, but still generates goods
+                return (2, self.swapTwoDays())
+            elif neighbourChoice == 3:
+                # good neighbour choice
+                return (3, self.swapSpecialistTwoNeighbourPeriods())
+        elif depth == 1:
+            neighbourChoice = random.choice([0, 1])
+            if neighbourChoice == 0:
+                # good neighbour choice
+                return (1, self.swapSpecialistTwoPeriods())
+            elif neighbourChoice == 1:
+                # good neighbour choice
+                return (3, self.swapSpecialistTwoNeighbourPeriods())
+
+        else:
+            # At depth > 1, must generate period moving only moves, that are consistent with the locals' constraints
+            neighbourChoice = random.choice([0, 1, 2])
+            if neighbourChoice == 0:
+                # good neighbour choice
+                return (1, self.swapSpecialistTwoPeriods())
+            elif neighbourChoice == 1:
+                # average neighbour choice, only produces goods at the start of the depth, and still less than the other choices
+                # Still a good solution mixer and local minimum escaper, letting it there
+                return (2, self.swapTwoDays())
+            elif neighbourChoice == 2:
+                # excellent neighbour choice, great for optimizing at start and also after a while
+                # Generates very close neighbours, local optimization.
+                return (3, self.swapSpecialistTwoNeighbourPeriods())
+
+    def addOrRemoveGroupMeetingWithSpecialist(self):
+        groupsNeeds = self.classesAndResources.groupsNeeds != 0
+        whereNeeds = np.where(groupsNeeds)
+        triggeredNeed = random.randrange(0, len(whereNeeds[0]))
+
+        triggeredGroup = whereNeeds[0][triggeredNeed]
+        triggeredSpecialist = whereNeeds[1][triggeredNeed]
+
+        triggeredLocal = random.choice(self.classesAndResources.localListBySpecialistAndGroup[triggeredGroup][triggeredSpecialist])
+
+        addingGroup = random.choice([True, False])
+        if addingGroup:
+            # These groups and specialist must not already meet
+            groupAndSpecialistDoNotMeet = np.sum(self.meetByPeriodByDayByLocalBySubjectByGroup[triggeredGroup, triggeredSpecialist], axis=0) == 0
+            # And the local must be free on that period
+            localIsFree = np.sum(self.meetByPeriodByDayByLocalBySubjectByGroup[:, :, triggeredLocal], axis=(0, 1)) == 0
+
+            possiblePeriods = np.where(np.logical_and(groupAndSpecialistDoNotMeet, localIsFree))
+        else:
+            # These groups and specialist must meet
+            possiblePeriods = np.where(np.sum(self.meetByPeriodByDayByLocalBySubjectByGroup[triggeredGroup, triggeredSpecialist], axis=0) != 0)
+
+        if len(possiblePeriods[0]) == 0:
+            return None
+
+        possiblePeriodIndex = random.randrange(0, len(possiblePeriods[0]))
+
+        triggeredDay = possiblePeriods[0][possiblePeriodIndex]
+        triggeredPeriod = possiblePeriods[1][possiblePeriodIndex]
+
+        meetByPeriodByDayByLocalBySubjectByGroup = np.copy(self.meetByPeriodByDayByLocalBySubjectByGroup)
+        meetByPeriodByDayByLocalBySubjectByGroup[triggeredGroup, triggeredSpecialist, triggeredLocal, triggeredDay, triggeredPeriod] = addingGroup
+
+        return SolutionInstance(self.classesAndResources, meetByPeriodByDayByLocalBySubjectByGroup)
+
+    def swapSpecialistTwoPeriods(self):
+        groupWithSwappedSpecialist = random.randrange(0, self.meetByPeriodByDayByLocalBySubjectByGroup.shape[0])
+        groupSpecialists = np.where(np.sum(self.meetByPeriodByDayByLocalBySubjectByGroup[groupWithSwappedSpecialist], axis=(1, 2, 3)) > 0)[0]
+
+        if len(groupSpecialists) == 0:
+            return None
+
+        specialistWithSwappedGroup = random.choice(groupSpecialists)
+
+        possibleFirstPeriods = np.where(self.meetByPeriodByDayByLocalBySubjectByGroup[groupWithSwappedSpecialist, specialistWithSwappedGroup])
+        firstPeriodSwap = random.randrange(0, len(possibleFirstPeriods[0]))
+        firstLocal = possibleFirstPeriods[0][firstPeriodSwap]
+        firstDay = possibleFirstPeriods[1][firstPeriodSwap]
+        firstPeriod = possibleFirstPeriods[2][firstPeriodSwap]
+
+        possibleSecondPeriodsNotTeachingGroup = np.where(np.sum(self.meetByPeriodByDayByLocalBySubjectByGroup[:, specialistWithSwappedGroup], axis=(0, 1)) == 0)
+        possibleSecondPeriodsTeachingOtherGroups = np.where(np.concatenate([self.meetByPeriodByDayByLocalBySubjectByGroup[:groupWithSwappedSpecialist, specialistWithSwappedGroup, firstLocal], self.meetByPeriodByDayByLocalBySubjectByGroup[groupWithSwappedSpecialist + 1:, specialistWithSwappedGroup, firstLocal]]))
+        if len(possibleSecondPeriodsNotTeachingGroup[0]) + len(possibleSecondPeriodsTeachingOtherGroups[0]) == 0:
+            return None
+
+        secondPeriodSwap = random.randrange(0, len(possibleSecondPeriodsNotTeachingGroup[0]) + len(possibleSecondPeriodsTeachingOtherGroups[0]))
+
+        meetByPeriodByDayByLocalBySubjectByGroup = np.copy(self.meetByPeriodByDayByLocalBySubjectByGroup)
+
+        if secondPeriodSwap < len(possibleSecondPeriodsNotTeachingGroup[0]):
+
+            secondDay = possibleSecondPeriodsNotTeachingGroup[0][secondPeriodSwap]
+            secondPeriod = possibleSecondPeriodsNotTeachingGroup[1][secondPeriodSwap]
+
+            meetByPeriodByDayByLocalBySubjectByGroup[groupWithSwappedSpecialist, specialistWithSwappedGroup, firstLocal, firstDay, firstPeriod] = False
+            meetByPeriodByDayByLocalBySubjectByGroup[groupWithSwappedSpecialist, specialistWithSwappedGroup, firstLocal, secondDay, secondPeriod] = True
+
+            return SolutionInstance(self.classesAndResources, meetByPeriodByDayByLocalBySubjectByGroup)
+        else:
+            secondPeriodSwap -= len(possibleSecondPeriodsNotTeachingGroup[0])
+
+            secondGroup = possibleSecondPeriodsTeachingOtherGroups[0][secondPeriodSwap]
+
+            # Need to recalibrate extracted group
+            if secondGroup >= groupWithSwappedSpecialist:
+                secondGroup += 1
+
+            secondDay = possibleSecondPeriodsTeachingOtherGroups[1][secondPeriodSwap]
+            secondPeriod = possibleSecondPeriodsTeachingOtherGroups[2][secondPeriodSwap]
+
+            meetByPeriodByDayByLocalBySubjectByGroup[groupWithSwappedSpecialist, specialistWithSwappedGroup, firstLocal, firstDay, firstPeriod] = False
+            meetByPeriodByDayByLocalBySubjectByGroup[groupWithSwappedSpecialist, specialistWithSwappedGroup, firstLocal, secondDay, secondPeriod] = True
+
+            meetByPeriodByDayByLocalBySubjectByGroup[secondGroup, specialistWithSwappedGroup, firstLocal, firstDay, firstPeriod] = True
+            meetByPeriodByDayByLocalBySubjectByGroup[secondGroup, specialistWithSwappedGroup, firstLocal, secondDay, secondPeriod] = False
+
+            return SolutionInstance(self.classesAndResources, meetByPeriodByDayByLocalBySubjectByGroup)
+
+    def swapTwoDays(self):
+        meetByPeriodByDayByLocalBySubjectByGroup = np.copy(self.meetByPeriodByDayByLocalBySubjectByGroup)
+        firstDay = random.randrange(0, meetByPeriodByDayByLocalBySubjectByGroup.shape[3])
+        secondDay = random.randrange(0, meetByPeriodByDayByLocalBySubjectByGroup.shape[3] - 1)
+        if secondDay >= firstDay:
+            secondDay += 1
+        meetByPeriodByDayByLocalBySubjectByGroup[...,[firstDay, secondDay],:] = meetByPeriodByDayByLocalBySubjectByGroup[...,[secondDay, firstDay],:]
+        return SolutionInstance(self.classesAndResources, meetByPeriodByDayByLocalBySubjectByGroup)
+
+    def swapSpecialistTwoNeighbourPeriods(self):
+        groupWithSwappedSpecialist = random.randrange(0, self.meetByPeriodByDayByLocalBySubjectByGroup.shape[0])
+        groupSpecialists = np.where(np.sum(self.meetByPeriodByDayByLocalBySubjectByGroup[groupWithSwappedSpecialist], axis=(1, 2, 3)) > 0)[0]
+
+        if len(groupSpecialists) == 0:
+            return None
+
+        specialistWithSwappedGroup = random.choice(groupSpecialists)
+
+        possibleFirstPeriods = np.where(self.meetByPeriodByDayByLocalBySubjectByGroup[groupWithSwappedSpecialist, specialistWithSwappedGroup])
+        firstPeriodSwap = random.randrange(0, len(possibleFirstPeriods[0]))
+        firstLocal = possibleFirstPeriods[0][firstPeriodSwap]
+        firstDay = possibleFirstPeriods[1][firstPeriodSwap]
+        firstPeriod = possibleFirstPeriods[2][firstPeriodSwap]
+
+        minusFirstPeriod = (firstPeriod + self.meetByPeriodByDayByLocalBySubjectByGroup.shape[4] - 1) % self.meetByPeriodByDayByLocalBySubjectByGroup.shape[4]
+        plusFirstPeriod = (firstPeriod + 1) % self.meetByPeriodByDayByLocalBySubjectByGroup.shape[4]
+        minusFirstDay = (firstDay + self.meetByPeriodByDayByLocalBySubjectByGroup.shape[3] - 1) % self.meetByPeriodByDayByLocalBySubjectByGroup.shape[3]
+        plusFirstDay = (firstDay + 1) % self.meetByPeriodByDayByLocalBySubjectByGroup.shape[3]
+        
+        possibleSecondDays = [minusFirstDay, firstDay, firstDay, plusFirstDay]
+        possibleSecondPeriods = [firstPeriod, minusFirstPeriod, plusFirstPeriod, firstPeriod]
+        possibleSecondPeriodsNotTeachingGroup = np.where((np.sum(self.meetByPeriodByDayByLocalBySubjectByGroup[:, specialistWithSwappedGroup], axis=(0, 1)) == 0)[possibleSecondDays, possibleSecondPeriods])[0]
+        possibleSecondPeriodsTeachingOtherGroups = np.where(np.concatenate([self.meetByPeriodByDayByLocalBySubjectByGroup[:groupWithSwappedSpecialist, specialistWithSwappedGroup, firstLocal], self.meetByPeriodByDayByLocalBySubjectByGroup[groupWithSwappedSpecialist + 1:, specialistWithSwappedGroup, firstLocal]])[:, possibleSecondDays, possibleSecondPeriods])
+        if len(possibleSecondPeriodsNotTeachingGroup) + len(possibleSecondPeriodsTeachingOtherGroups[0]) == 0:
+            return None
+
+        secondPeriodSwap = random.randrange(0, len(possibleSecondPeriodsNotTeachingGroup) + len(possibleSecondPeriodsTeachingOtherGroups[0]))
+
+        meetByPeriodByDayByLocalBySubjectByGroup = np.copy(self.meetByPeriodByDayByLocalBySubjectByGroup)
+
+        if secondPeriodSwap < len(possibleSecondPeriodsNotTeachingGroup):
+            selectedIndex  = possibleSecondPeriodsNotTeachingGroup[secondPeriodSwap]
+            secondDay = possibleSecondDays[selectedIndex]
+            secondPeriod = possibleSecondPeriods[selectedIndex]
+
+            meetByPeriodByDayByLocalBySubjectByGroup[groupWithSwappedSpecialist, specialistWithSwappedGroup, firstLocal, firstDay, firstPeriod] = False
+            meetByPeriodByDayByLocalBySubjectByGroup[groupWithSwappedSpecialist, specialistWithSwappedGroup, firstLocal, secondDay, secondPeriod] = True
+
+            return SolutionInstance(self.classesAndResources, meetByPeriodByDayByLocalBySubjectByGroup)
+        else:
+            secondPeriodSwap -= len(possibleSecondPeriodsNotTeachingGroup)
+
+            selectedIndex = possibleSecondPeriodsTeachingOtherGroups[1][secondPeriodSwap]
+            secondGroup = possibleSecondPeriodsTeachingOtherGroups[0][secondPeriodSwap]
+            secondDay = possibleSecondDays[selectedIndex]
+            secondPeriod = possibleSecondPeriods[selectedIndex]
+
+            # Need to recalibrate extracted group
+            if secondGroup >= groupWithSwappedSpecialist:
+                secondGroup += 1
+
+            meetByPeriodByDayByLocalBySubjectByGroup[groupWithSwappedSpecialist, specialistWithSwappedGroup, firstLocal, firstDay, firstPeriod] = False
+            meetByPeriodByDayByLocalBySubjectByGroup[groupWithSwappedSpecialist, specialistWithSwappedGroup, firstLocal, secondDay, secondPeriod] = True
+
+            meetByPeriodByDayByLocalBySubjectByGroup[secondGroup, specialistWithSwappedGroup, firstLocal, firstDay, firstPeriod] = True
+            meetByPeriodByDayByLocalBySubjectByGroup[secondGroup, specialistWithSwappedGroup, firstLocal, secondDay, secondPeriod] = False
+
+            return SolutionInstance(self.classesAndResources, meetByPeriodByDayByLocalBySubjectByGroup)
+
+    def swapTwoClosePeriodsPairs(self): # Turned out not to be a good neighbour generator
+        meetByPeriodByDayByLocalBySubjectByGroup = np.copy(self.meetByPeriodByDayByLocalBySubjectByGroup)
+        firstDay = random.randrange(0, meetByPeriodByDayByLocalBySubjectByGroup.shape[3])
+        secondDay = random.randrange(0, meetByPeriodByDayByLocalBySubjectByGroup.shape[3])
+        firstPeriod = random.choice(list(range(self.classesAndResources.school.periodsInAm - 1)) + list(map(lambda pmPeriod: self.classesAndResources.school.periodsInAm + pmPeriod, range(self.classesAndResources.school.periodsInPm - 1))))
+
+        secondPeriodAmChoice = list(range(self.classesAndResources.school.periodsInAm - 1))
+        secondPeriodPmChoice = list(map(lambda pmPeriod: self.classesAndResources.school.periodsInAm + pmPeriod, range(self.classesAndResources.school.periodsInPm - 1)))
+
+        if firstDay == secondDay:
+            if firstPeriod < self.classesAndResources.school.periodsInAm:
+                del secondPeriodAmChoice[firstPeriod]
+                if firstPeriod < len(secondPeriodAmChoice):
+                    del secondPeriodAmChoice[firstPeriod]
+            else:
+                del secondPeriodPmChoice[firstPeriod - len(secondPeriodAmChoice) - 1]
+                if firstPeriod - len(secondPeriodAmChoice) - 1 < len(secondPeriodPmChoice):
+                    del secondPeriodPmChoice[firstPeriod - len(secondPeriodAmChoice) - 1]
+
+        secondPeriod = random.choice(secondPeriodAmChoice + secondPeriodPmChoice)
+        
+        meetByPeriodByDayByLocalBySubjectByGroup[...,[firstDay, firstDay, secondDay, secondDay],[firstPeriod, firstPeriod + 1, secondPeriod, secondPeriod + 1]] = meetByPeriodByDayByLocalBySubjectByGroup[...,[secondDay, secondDay, firstDay, firstDay],[secondPeriod, secondPeriod + 1, firstPeriod, firstPeriod + 1]]
+        return SolutionInstance(self.classesAndResources, meetByPeriodByDayByLocalBySubjectByGroup)
+
+    def toString(self):
+        argsWhere = np.where(self.meetByPeriodByDayByLocalBySubjectByGroup)
+        groupByPeriodByDayBySpecialist = np.zeros((self.meetByPeriodByDayByLocalBySubjectByGroup.shape[1], self.meetByPeriodByDayByLocalBySubjectByGroup.shape[3], self.meetByPeriodByDayByLocalBySubjectByGroup.shape[4]))
+        groupByPeriodByDayBySpecialist[argsWhere[1], argsWhere[3], argsWhere[4]] = argsWhere[0] + 1
+
+        specialistByPeriodByDayByGroup = np.zeros((self.meetByPeriodByDayByLocalBySubjectByGroup.shape[0], self.meetByPeriodByDayByLocalBySubjectByGroup.shape[3], self.meetByPeriodByDayByLocalBySubjectByGroup.shape[4]))
+        specialistByPeriodByDayByGroup[argsWhere[0], argsWhere[3], argsWhere[4]] = argsWhere[1] + 1
+
+        return self.classesAndResources.toString() + """
+
+Groups schedules (0 = no specialist):
+""" + "\n".join(map(lambda indexAndX: self.classesAndResources.groups[indexAndX[0]].name + ":\n" + str(indexAndX[1].T), enumerate(specialistByPeriodByDayByGroup))) + """
+
+Specialists schedules (0 = no group):
+""" + "\n".join(map(lambda indexAndX: self.classesAndResources.specialists[indexAndX[0]].name + ":\n" + str(indexAndX[1].T), enumerate(groupByPeriodByDayBySpecialist))) + """
+
+Solution cost: """ + str(self.getTotalCost().toString())

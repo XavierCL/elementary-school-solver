@@ -1,0 +1,40 @@
+% NB_EMPLOYES est le nombre d'employes.
+% NB_ACTIVITES est le nombre d'activites
+% NB_PERIODES est le nombre de periodes de 15 minutes a planifier
+% demande est une matrice de dimensions NB_PERIODES x NB_ACTIVITES donnant le nombre employes demandes pour une activite donnee a un temps donne.
+% surcout est une matrice de dimensions NB_PERIODES x NB_ACTIVITES donnant la penalite pour avoir un employe de plus que la demande pour une activite et un instant donne.
+% souscout est une matrice de dimensions NB_PERIODES x NB_ACTIVITES donnant la penalite pour avoir un employe de moins que la demande pour une activite et un instant donne.
+
+JOURS_CYCLE = 10;
+PERIODES_JOUR = 5;
+SPECIALISTES = 3; %ANGLAIS + EDUC_PHYS + MUSIQUE
+NIVEAUX = 6;
+MAX_GROUPES = 1;
+TEMPS_PLEIN = 41;
+SPECIALITES_PAR_GROUPE = 9;
+
+DEMANDE = [||4, 3, 2|, % 1e année,
+            |4, 3, 2|, % 2e année
+            |4, 3, 2|, % 3e année
+            |4, 3, 2|, % 4e année
+            |4, 3, 2|, % 5e année
+            |4, 3, 2||]; %6e année
+            
+PAVILLONS = [|1|
+             1|
+             1|
+             1|
+             1|
+             1||];
+
+DISPOS_SPECIALISTES = [||1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|,
+                        |1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|,
+                        |1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1|1,1,1,1,1||];
+                        
+DISPOS_TUTEURS = [|1,1,1,1,1,1,1,1,1,1
+                  |1,1,1,1,1,1,1,1,1,1
+                  |1,1,1,1,1,1,1,1,1,1
+                  |1,1,1,1,1,1,1,1,1,1
+                  |1,1,1,1,1,1,1,1,1,1
+                  |1,1,1,1,1,1,1,1,1,1|];
+
