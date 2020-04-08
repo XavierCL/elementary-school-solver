@@ -26,14 +26,14 @@ def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temp
     selectedEqual = 0
     selectedBad = 0
     depth = 0
-    temperature = initialTemperature
+#    temperature = initialTemperature
     startTime = time.time() * 1000.
 
     try:
         while time.time() * 1000. < startTime + msToSpend and depth <= lastSolution.maxDepth:
             depthStats.append(time.time())
             lastSolutionCost = lastSolution.getTotalCost()
-#            temperature = initialTemperature
+            temperature = initialTemperature
             while time.time() * 1000. < startTime + msToSpend and not lastSolutionCost.isPerfect():
                 (neighbourType, neighbourSolution) = lastSolution.getNeighbour(depth)
                 generatedNeighbours += 1
