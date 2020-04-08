@@ -1,0 +1,5 @@
+# ignore all json
+*.json
+
+# ignore an entire directory
+.idea/
