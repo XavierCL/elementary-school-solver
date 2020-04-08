@@ -1,9 +1,12 @@
+# Pycharm
+**/.idea/
+
 # Statistic files
-badNeighbourTypes.json
-depths.json
-equalNeighbourTypes.json
-goodNeighbourTypes.json
-realBadNeighbourTypes.json
+**/badNeighbourTypes.json
+**/depths.json
+**/equalNeighbourTypes.json
+**/goodNeighbourTypes.json
+**/realBadNeighbourTypes.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
