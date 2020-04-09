@@ -25,7 +25,7 @@ class SolutionCost:
         return self.scores[np.argmax(self.scores != 0)]
 
     def toString(self):
-        scoresTab = "  {0:<10} {1:<10} {2:<11} ---     {3:<10} {4:<8} {5:<12} -      {6:<8} {7:<8}".format(
+        scoresTab = "  {0:<6}|    {1:<5} |  {2:<12}-||-     {3:<10} {4:<8} {5:<11} |   {6:<8} {7:<8} |    {8:<8}".format(
             int(self.scores[0]),
             int(self.scores[1]),
             round(self.scores[2], 5),
@@ -33,5 +33,6 @@ class SolutionCost:
             int(self.details[1]),
             int(self.details[2]),
             int(self.details[3]),
-            int(self.details[4]))
+            int(self.details[4]),
+            int(self.details[5]))
         return scoresTab

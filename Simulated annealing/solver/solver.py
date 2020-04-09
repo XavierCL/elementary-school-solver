@@ -8,6 +8,7 @@ import json
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
+
 def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temperatureDecreaseRate):
 
     emptyMeets = np.zeros((len(classesAndResources.groups),
@@ -35,8 +36,8 @@ def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temp
     depth = 0
     startTime = time.time() * 1000.
     printTrace = False
-    header = "{0:<10} {1:<13} {2:<15} {3:<45} {4}".format(
-        "Hard 1", "Hard 2", "Soft", "Free P across Days/Periods/Board", "Grouping")
+    header = "{0:<10} {1:<12} {2:<15} {3:<37} {4:<10} {5}".format("Hard 1  |", "Hard 2  |", "Soft -> details:",
+                                "Free P across Days/Periods/Board  |", "Grouping subject", " | Same level")
     print(header)
     try:
         while time.time() * 1000. < startTime + msToSpend and depth <= lastSolution.maxDepth:

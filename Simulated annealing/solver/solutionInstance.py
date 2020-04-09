@@ -121,12 +121,12 @@ class SolutionInstance:
         teachSameLevelsTogetherCost = self.getTeachSameLevelsTogetherCost(meetArgs)
 
         return ((tutorFreePeriodsAcrossTheDaysCost * 1000 +
-                 tutorFreePeriodsAcrossThePeriodsCost +
+                 tutorFreePeriodsAcrossThePeriodsCost * 100 +
                  tutorFreePeriodsAcrossTheBoard +
                  groupsSubjectPeriodsAcrossThePeriodsCost +
-                 groupsSubjectPeriodsAcrossTheBoardCost +
-                 teachSameLevelsTogetherCost
-                 ) / 1_500_000,
+                 groupsSubjectPeriodsAcrossTheBoardCost * 1000 +
+                 teachSameLevelsTogetherCost * 1000
+                 ) / 1_500_000/200,
                 [tutorFreePeriodsAcrossTheDaysCost,
                  tutorFreePeriodsAcrossThePeriodsCost,
                  tutorFreePeriodsAcrossTheBoard,
@@ -275,7 +275,7 @@ class SolutionInstance:
             return (neighbourChoice, neighbourFunctions[neighbourChoice])
         else:
             # At depth > 1, must generate period moving only moves, that are consistent with the locals' constraints
-            neighbourChoice = random.choice([1, 3, 6])
+            neighbourChoice = random.choice([1, 3, 5, 6])
             return (neighbourChoice, neighbourFunctions[neighbourChoice])
 
 
@@ -769,6 +769,8 @@ class SolutionInstance:
                                                    self.meetByPeriodByDayByLocalBySubjectByGroup.shape[4]))
         specialistByPeriodByDayByGroup[argsWhere[0], argsWhere[3], argsWhere[4]] = argsWhere[1] + 1
 
+        header = "{0:<10} {1:<12} {2:<15} {3:<37} {4:<10} {5}".format("Hard 1  |", "Hard 2  |", "Soft -> details:",
+                                        "Free P across Days/Periods/Board  |", "Grouping subject", " | Same level")
         return self.classesAndResources.toString() + """
 
 Groups schedules (0 = no specialist):
@@ -777,6 +779,5 @@ Groups schedules (0 = no specialist):
 
 Specialists schedules (0 = no group):
 """ + "\n".join(map(lambda indexAndX: self.classesAndResources.specialists[indexAndX[0]].name +
-                                      ":\n" + str(indexAndX[1].T), enumerate(groupByPeriodByDayBySpecialist))) + """
-
-Solution cost: """ + str(self.getTotalCost().toString())
+                                      ":\n" + str(indexAndX[1].T), enumerate(groupByPeriodByDayBySpecialist))) + "\n\n\t\t\t\t" + header + """
+Solution cost:  """ + str(self.getTotalCost().toString())
