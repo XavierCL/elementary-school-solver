@@ -32,6 +32,7 @@ def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temp
         while time.time() * 1000. < startTime + msToSpend and depth <= lastSolution.maxDepth:
             depthStats.append(time.time())
             temperature = initialTemperature
+            lastSolutionCost = lastSolution.getTotalCost()
             while time.time() * 1000. < startTime + msToSpend and not lastSolutionCost.isPerfect(depth):
                 (neighbourType, neighbourSolution) = lastSolution.getNeighbour(depth)
                 generatedNeighbours += 1
@@ -82,9 +83,6 @@ def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temp
         outfile.write(json.dumps(realBadNeighbourStats))
     with open("No_neighbour_generated.json", "w") as outfile:
         outfile.write(json.dumps(noNeighbourStats))
-        print(len(noNeighbourStats), "noNeighbourTypes.json")
-        for n in noNeighbourStats:
-            print(len(n))
     with open("depths.json", "w") as outfile:
         outfile.write(json.dumps(depthStats))
 

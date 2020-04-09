@@ -39,9 +39,11 @@ def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
                     data[observationIndex, 1] = 1.
                     observationIndex+=1
 
+                numberOfChanges = len(data)
+                minX = np.amin(data[:,0])
+                maxX = np.amax(data[:,0])
+
                 if xCoupling != None:
-                    minX = np.amin(data[:,0])
-                    maxX = np.amax(data[:,0])
                     couplingSize = (maxX - minX) / xCoupling
                     coupledData = np.zeros((xCoupling, 2))
 
@@ -50,7 +52,6 @@ def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
                         coupledData[couplingIndex, 1] = \
                             np.sum(data[np.logical_and(minX + couplingIndex * couplingSize <= data[:,0],
                                                        data[:,0] < minX + (couplingIndex + 1) * couplingSize)][:,1])
-                    numberOfChanges = len(data)
                     data = coupledData
                 my_label = (str(numberOfChanges) + " " + neighbourTypeNames[neighbourType])
                 ax[row_index, col_index].set_xlabel("seconds")
