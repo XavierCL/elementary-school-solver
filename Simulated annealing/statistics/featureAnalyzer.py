@@ -1,27 +1,27 @@
 import json
-from math import ceil
-
+from math import inf
 import matplotlib.pyplot as plt
 import numpy as np
 
 def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
     featureNameIndex = 0
-    neighbourTypeNames = ["+/- meeting w/ specialist",
-                          "swap rnd P",
-                          "swap rnd days",
-                          "swap adjacent P",
-                          "swap close P",
-                          "swap diagonal P",
-                          "swap P in same day",
-                          "swap P from rnd days",
-                          "multiple swaps"]
+    neighbourTypeNames = ["+/- GroupMeetingWithSpec",
+                          "swapSpec  2P",
+                          "swap 2Days",
+                          "swapSpec 2NBR P",
+                          "swap 2CloseP Pairs",
+                          "swapSpec 2DiagonalP",
+                          "swapSpec SameDayP",
+                          "swapSpec P Rand Days"]
 
     jsonDepths = open("depths.json", "r")
     depthsData = jsonDepths.read()
     depths = json.loads(depthsData)
     jsonDepths.close()
+    colors = ['b', 'k', 'lime', 'r', 'darkorange', 'm', 'g', 'c', 'yellow']
     fig, ax = plt.subplots(nrows=2, ncols=2)
     row_index = 0
+    minX = inf
     for row in ax:
         col_index = 0
         for col in row:
@@ -31,7 +31,7 @@ def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
             featuresFile.close()
             features = json.loads(featuresData)
             featureNameIndex += 1
-
+            neighbourIndex = 0
             for neighbourType, times in enumerate(features):
 
                 if len(times) == 0:
@@ -46,7 +46,7 @@ def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
                     observationIndex+=1
 
                 numberOfChanges = len(data)
-                minX = np.amin(data[:,0])
+                minX = np.amin(data[:,0]) if np.amin(data[:,0]) < minX else minX
                 maxX = np.amax(data[:,0])
 
                 if xCoupling != None:
@@ -63,11 +63,12 @@ def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
                 ax[row_index, col_index].set_xlabel("seconds")
                 if cumul:
                     cumulative = np.cumsum(data[:,1])
-                    col.plot(data[:,0] - minX, cumulative, label=my_label)
+                    col.plot(data[:,0] - minX, cumulative, label=my_label, color=colors[neighbourIndex])
                 else:
-                    col.plot(data[:,0] - minX, data[:,1], label=my_label)
+                    col.plot(data[:,0] - minX, data[:,1], label=my_label, color=colors[neighbourIndex])
                 ax[row_index, col_index].set_title(featureName)
                 ax[row_index, col_index].legend()
+                neighbourIndex += 1
             for d in depths:
                 if minX - d < 0:
                     ax[row_index, col_index].axvline(d - minX, 0, np.amax(data[:,1]), c="grey", linestyle="--")
