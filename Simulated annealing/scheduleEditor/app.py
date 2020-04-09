@@ -151,6 +151,7 @@ class TutorialApp(App):
             cellLayout.add_widget(createDeleteMeetingButton(specialist, day, period))
             return cellLayout
 
+        # Should be using a relative layout instead and place buttons manually using pixel positions
         rootGrid = GridLayout(cols=classInstance.school.daysInCycle + 1, rows=len(classInstance.specialists)*classInstance.school.periodsInDay + classInstance.school.periodsInDay, size_hint=(None, None), size=(2000, 1000))
         rootGrid.bind(minimum_height=rootGrid.setter('height'))
         rootGrid.bind(minimum_width=rootGrid.setter('width'))
