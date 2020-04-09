@@ -5,13 +5,13 @@ import numpy as np
 def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
     featureNameIndex = 0
     neighbourTypeNames = ["+/- meeting w/ specialist",
-                          "swap random P",
-                          "swap days",
+                          "swap rnd P",
+                          "swap rnd days",
                           "swap adjacent P",
                           "swap close P",
                           "swap diagonal P",
-                          "swap P within day",
-                          "swap P 3 days apart",
+                          "swap P in same day",
+                          "swap P from rnd days",
                           "multiple swaps"]
 
     fig, ax = plt.subplots(nrows=2, ncols=2)
@@ -61,7 +61,8 @@ def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
                     col.plot(data[:,0] - minX, data[:,1], label=my_label)
                 ax[row_index, col_index].set_title(featureName)
                 ax[row_index, col_index].legend()
-            fig.suptitle('Neighbours generated through time')
+            subtitle = "Cumulative total of neighbours generated through time" if cumul else 'Neighbours generated through time'
+            fig.suptitle(subtitle)
             col_index += 1
         row_index += 1
 

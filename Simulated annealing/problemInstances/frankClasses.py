@@ -5,7 +5,7 @@ from local import Local
 from problemInstances import school1
 import numpy as np
 
-def getFrankHalfTimeTutorHardCost(solutionInstance):
+def getHalfTimeTutorHardCost(solutionInstance):
     # Penalizes every time an AM where an absent tutor does not have two periods without specialist
     # Penalizes every time a PM where an absent tutor does not have two periods without specialist
 
@@ -118,4 +118,4 @@ def frankClassesInstance():
         Local(6, "First premise Science room (Mousserons)", 1, {15, 16}, {5})
     ]
 
-    return ClassesAndResources(school, groups, specialists, locals, {1: getFrankHalfTimeTutorHardCost})
+    return ClassesAndResources(school, groups, specialists, locals, {1: getHalfTimeTutorHardCost})
