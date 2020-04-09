@@ -13,6 +13,30 @@ class SolutionInstance:
         self.maxDepth = 2
         self.neighbourTypeCount = 9
 
+    def assignGroupToSpecialistDayAndPeriod(self, specialist, day, period, local, oldGroupId, newGroupId):
+        meetByPeriodByDayByLocalBySubjectByGroup = np.copy(self.meetByPeriodByDayByLocalBySubjectByGroup)
+        meetByPeriodByDayByLocalBySubjectByGroup[[oldGroupId, newGroupId], specialist, local, day, period] = meetByPeriodByDayByLocalBySubjectByGroup[[newGroupId, oldGroupId], specialist, local, day, period]
+        
+        return SolutionInstance(self.classesAndResources, meetByPeriodByDayByLocalBySubjectByGroup)
+
+    def assignLocalToSpecialistDayAndPeriod(self, specialist, day, period, group, oldLocalId, newLocalId):
+        meetByPeriodByDayByLocalBySubjectByGroup = np.copy(self.meetByPeriodByDayByLocalBySubjectByGroup)
+        meetByPeriodByDayByLocalBySubjectByGroup[group, specialist, [oldLocalId, newLocalId], day, period] = meetByPeriodByDayByLocalBySubjectByGroup[group, specialist, [newLocalId, oldLocalId], day, period]
+        
+        return SolutionInstance(self.classesAndResources, meetByPeriodByDayByLocalBySubjectByGroup)
+
+    def removeSpecialistDayPeriodMeeting(self, specialist, day, period):
+        meetByPeriodByDayByLocalBySubjectByGroup = np.copy(self.meetByPeriodByDayByLocalBySubjectByGroup)
+        meetByPeriodByDayByLocalBySubjectByGroup[:, specialist, :, day, period] = False
+        
+        return SolutionInstance(self.classesAndResources, meetByPeriodByDayByLocalBySubjectByGroup)
+
+    def addSpecialistDayPeriodMeetingWithGroupAtLocal(self, specialist, day, period, group, local):
+        meetByPeriodByDayByLocalBySubjectByGroup = np.copy(self.meetByPeriodByDayByLocalBySubjectByGroup)
+        meetByPeriodByDayByLocalBySubjectByGroup[group, specialist, local, day, period] = True
+        
+        return SolutionInstance(self.classesAndResources, meetByPeriodByDayByLocalBySubjectByGroup)
+
     def getTotalCost(self):
         hardConstraintViolationCount = self.getHardConstraintCost()
         customHardCost = self.classesAndResources.getDepthCost(self, 0)

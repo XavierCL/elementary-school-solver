@@ -5,7 +5,6 @@ import random
 import math
 import json
 
-
 def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temperatureDecreaseRate):
 
     emptyMeets = np.zeros((len(classesAndResources.groups), len(classesAndResources.specialists), len(classesAndResources.locals), classesAndResources.school.daysInCycle, classesAndResources.school.periodsInDay)).astype(np.bool)

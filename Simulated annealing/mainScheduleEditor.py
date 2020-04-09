@@ -1,8 +1,3 @@
-from kivy.app import App
-from problemInstances import 
+from scheduleEditor import app
 
-class TutorialApp(App):
-    pass
-
-if __name__ == "__main__":
-    TutorialApp().run()
+app.TutorialApp().run()
