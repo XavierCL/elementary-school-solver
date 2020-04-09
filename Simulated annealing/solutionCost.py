@@ -12,8 +12,8 @@ class SolutionCost:
     def equalsTo(self, solutionScore):
         return np.array_equal(self.scores, solutionScore.scores)
 
-    def isPerfect(self):
-        return np.sum(self.scores) == 0
+    def isPerfect(self, upToIndex):
+        return np.sum(self.scores[:upToIndex+1]) == 0
 
     def magnitude(self):
         argMax = np.argmax(self.scores != 0)

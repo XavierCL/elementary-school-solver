@@ -552,26 +552,18 @@ class SolutionInstance:
         firstDay = possibleFirstPeriods[1][firstPeriodSwap]
         firstPeriod = possibleFirstPeriods[2][firstPeriodSwap]
 
-        randomSwitch = random.choice([1, 2, 3])
+        possibleSecondPeriods = (np.arange(0, self.classesAndResources.school.periodsInDay - 1) + firstPeriod) % self.classesAndResources.school.periodsInDay
 
-        minusFirstPeriod = (firstPeriod + self.meetByPeriodByDayByLocalBySubjectByGroup.shape[4] - randomSwitch) % \
-                           self.meetByPeriodByDayByLocalBySubjectByGroup.shape[4]
-        plusFirstPeriod = (firstPeriod + randomSwitch) % self.meetByPeriodByDayByLocalBySubjectByGroup.shape[4]
-
-        possibleSecondDays = [firstDay, firstDay]
-        possibleSecondPeriods = [minusFirstPeriod, plusFirstPeriod]
-        possibleSecondPeriodsNotTeachingGroup = np.where(
-            (np.sum(self.meetByPeriodByDayByLocalBySubjectByGroup[:, specialistWithSwappedGroup], axis=(0, 1)) == 0)[
-                possibleSecondDays, possibleSecondPeriods])[0]
+        possibleSecondPeriodsNotTeachingGroup = np.where((np.sum(self.meetByPeriodByDayBySpecialistByGroup[:, specialistWithSwappedGroup, firstDay], axis=0) == 0)[possibleSecondPeriods])[0]
         possibleSecondPeriodsTeachingOtherGroups = np.where(np.concatenate([
                                                                                self.meetByPeriodByDayByLocalBySubjectByGroup[
                                                                                :groupWithSwappedSpecialist,
-                                                                               specialistWithSwappedGroup, firstLocal],
+                                                                               specialistWithSwappedGroup, firstLocal, firstDay],
                                                                                self.meetByPeriodByDayByLocalBySubjectByGroup[
                                                                                groupWithSwappedSpecialist + 1:,
                                                                                specialistWithSwappedGroup,
-                                                                               firstLocal]])[:, possibleSecondDays,
-                                                            possibleSecondPeriods])
+                                                                               firstLocal, firstDay]])[:, possibleSecondPeriods])
+
         if len(possibleSecondPeriodsNotTeachingGroup) + len(possibleSecondPeriodsTeachingOtherGroups[0]) == 0:
             return None
 
@@ -582,7 +574,7 @@ class SolutionInstance:
 
         if secondPeriodSwap < len(possibleSecondPeriodsNotTeachingGroup):
             selectedIndex = possibleSecondPeriodsNotTeachingGroup[secondPeriodSwap]
-            secondDay = possibleSecondDays[selectedIndex]
+            secondDay = firstDay
             secondPeriod = possibleSecondPeriods[selectedIndex]
 
             meetByPeriodByDayByLocalBySubjectByGroup[
@@ -596,7 +588,7 @@ class SolutionInstance:
 
             selectedIndex = possibleSecondPeriodsTeachingOtherGroups[1][secondPeriodSwap]
             secondGroup = possibleSecondPeriodsTeachingOtherGroups[0][secondPeriodSwap]
-            secondDay = possibleSecondDays[selectedIndex]
+            secondDay = firstDay
             secondPeriod = possibleSecondPeriods[selectedIndex]
 
             # Need to recalibrate extracted group

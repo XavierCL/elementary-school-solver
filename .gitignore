@@ -2,11 +2,12 @@
 **/.idea/
 
 # Statistic files
-**/badNeighbourTypes.json
+**/Good_neighbour_generated.json
+**/Equal_neighbour_generated.json
+**/Bad_neighbour_generated.json
+**/Real_bad_neighbour_generated.json
+**/No_neighbour_generated.json
 **/depths.json
-**/equalNeighbourTypes.json
-**/goodNeighbourTypes.json
-**/realBadNeighbourTypes.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

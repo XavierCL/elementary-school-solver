@@ -71,5 +71,5 @@ featureNames = ["Real_bad_neighbour_generated",
                 "Equal_neighbour_generated",
                 "Good_neighbour_generated"]
 cumulativeDisplay = True
-plotNumericFeatures(featureNames, cumulativeDisplay, 30)
+plotNumericFeatures(featureNames, cumulativeDisplay)
 plt.show()
