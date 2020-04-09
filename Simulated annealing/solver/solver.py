@@ -1,13 +1,21 @@
+import sys
 import solver.solutionInstance as solutionInstance
 import time
 import numpy as np
 import random
 import math
 import json
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temperatureDecreaseRate):
 
-    emptyMeets = np.zeros((len(classesAndResources.groups), len(classesAndResources.specialists), len(classesAndResources.locals), classesAndResources.school.daysInCycle, classesAndResources.school.periodsInDay)).astype(np.bool)
+    emptyMeets = np.zeros((len(classesAndResources.groups),
+                           len(classesAndResources.specialists),
+                           len(classesAndResources.locals),
+                           classesAndResources.school.daysInCycle,
+                           classesAndResources.school.periodsInDay)
+                          ).astype(np.bool)
     lastSolution = solutionInstance.SolutionInstance(classesAndResources, emptyMeets)
     bestSolution = lastSolution
     bestSolutionCost = bestSolution.getTotalCost()
@@ -26,7 +34,10 @@ def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temp
     selectedBad = 0
     depth = 0
     startTime = time.time() * 1000.
-
+    printTrace = False
+    header = "{0:<10} {1:<13} {2:<15} {3:<45} {4}".format(
+        "Hard 1", "Hard 2", "Soft", "Free P across Days/Periods/Board", "Grouping")
+    print(header)
     try:
         while time.time() * 1000. < startTime + msToSpend and depth <= lastSolution.maxDepth:
             depthStats.append(time.time())
@@ -45,7 +56,12 @@ def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temp
                             selectedGood += 1
                             goodNeighbourStats[neighbourType].append(time.time())
                             if neighbourCost.highestMagnitude() != lastSolutionCost.highestMagnitude():
-                                print(neighbourCost.toString())
+                                if printTrace:
+                                    print(neighbourCost.toString())
+                                else:
+                                    sys.stdout.flush()
+                                    sys.stdout.write(("\r" + neighbourCost.toString()))
+
                         else:
                             equalNeighbourStats[neighbourType].append(time.time())
                             selectedEqual += 1
@@ -56,12 +72,18 @@ def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temp
                         temperature *= temperatureDecreaseRate
                     else:
                         if neighbourCost.magnitude() == lastSolutionCost.magnitude() and random.uniform(0, 1) <= \
-                                math.e**(-(neighbourCost.highestMagnitude() - lastSolutionCost.highestMagnitude())/temperature):
+                                math.e**(-(neighbourCost.highestMagnitude() -
+                                           lastSolutionCost.highestMagnitude())/temperature):
                             badNeighbourStats[neighbourType].append(time.time())
                             
                             if neighbourCost.highestMagnitude() != lastSolutionCost.highestMagnitude():
-                                print(neighbourCost.toString())
-                            
+                                if printTrace:
+                                    print(neighbourCost.toString())
+                                else:
+                                    sys.stdout.flush()
+                                    sys.stdout.write(("\r" + neighbourCost.toString()))
+
+
                             lastSolutionCost = neighbourCost
                             lastSolution = neighbourSolution
                             selectedBad += 1
