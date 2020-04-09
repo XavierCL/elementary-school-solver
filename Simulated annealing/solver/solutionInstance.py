@@ -105,11 +105,11 @@ class SolutionInstance:
         teachSameLevelsTogetherCost = self.getTeachSameLevelsTogetherCost(meetArgs)
 
         return ((tutorFreePeriodsAcrossTheDaysCost * 1000 +
-                 tutorFreePeriodsAcrossThePeriodsCost * 10 +
+                 tutorFreePeriodsAcrossThePeriodsCost +
                  tutorFreePeriodsAcrossTheBoard +
-                 groupsSubjectPeriodsAcrossThePeriodsCost * 10 +
-                 groupsSubjectPeriodsAcrossTheBoardCost * 10 +
-                 teachSameLevelsTogetherCost * 1000
+                 groupsSubjectPeriodsAcrossThePeriodsCost +
+                 groupsSubjectPeriodsAcrossTheBoardCost +
+                 teachSameLevelsTogetherCost
                  ) / 1_500_000,
                 [tutorFreePeriodsAcrossTheDaysCost,
                  tutorFreePeriodsAcrossThePeriodsCost,
@@ -225,80 +225,27 @@ class SolutionInstance:
         return groupTogetherSameYearCost**2
 
     def getNeighbour(self, depth):
+        neighbourFunctions = [self.addOrRemoveGroupMeetingWithSpecialist(),
+                     self.swapSpecialistTwoPeriods(),
+                     self.swapTwoDays(),
+                     self.swapSpecialistTwoNeighbourPeriods(),
+                     self.swapTwoClosePeriodsPairs(),
+                     self.swapSpecialistTwoDiagonalNeighbourPeriods(),
+                     self.swapSpecialistSameDayPeriods(),
+                     self.swapSpecialistPeriodsRndDaysApart()]
+        self.neighbourTypeCount = len(neighbourFunctions)
+
         if depth == 0:
-            neighbourChoice = random.choice([0, 1, 2, 3, 6, 7])
-            if neighbourChoice == 0:
-                # Mandatory neighbour choice, adds the right classes, but still generates goods
-                return (0, self.addOrRemoveGroupMeetingWithSpecialist())
-            elif neighbourChoice == 1:
-                # good neighbour choice
-                return (1, self.swapSpecialistTwoPeriods())
-            elif neighbourChoice == 2:
-                # Poor neighbour choice, but still generates goods
-                return (2, self.swapTwoDays())
-            elif neighbourChoice == 3:
-                # good neighbour choice
-                return (3, self.swapSpecialistTwoNeighbourPeriods())
-            elif neighbourChoice == 4:
-                # Does not generates good neighbours
-                return (4, self.swapTwoClosePeriodsPairs())
-            elif neighbourChoice == 5:
-                # supposed to be less good than 2 neighbours
-                return (5, self.swapSpecialistTwoDiagonalNeighbourPeriods())
-            elif neighbourChoice == 6:
-                # Best generator yet
-                return (6, self.swapSpecialistSameDayPeriods())
-            elif neighbourChoice == 7:
-                # Good generator
-                return (7, self.swapSpecialistPeriodsRndDaysApart())
-            elif neighbourChoice == 8:
-                # Not yet implemented
-                return (8, self.multipleSwaps())
+            neighbourChoice = random.choice([0, 5])
+            return (neighbourChoice, neighbourFunctions[neighbourChoice])
+
         elif depth == 1:
-            neighbourChoice = random.choice([0, 1, 3, 4])
-            if neighbourChoice == 0:
-                # good neighbour choice
-                return (1, self.swapSpecialistTwoPeriods())
-            elif neighbourChoice == 1:
-                # good neighbour choice
-                return (3, self.swapSpecialistTwoNeighbourPeriods())
-            elif neighbourChoice == 2:
-                # supposed to be less good than 2 neighbours
-                return (5, self.swapSpecialistTwoDiagonalNeighbourPeriods())
-            elif neighbourChoice == 3:
-                # best generator
-                return (6, self.swapSpecialistSameDayPeriods())
-            elif neighbourChoice == 4:
-                # Good generator
-                return (7, self.swapSpecialistPeriodsRndDaysApart())
-            elif neighbourChoice == 5:
-                # not yet implemented
-                return (8, self.multipleSwaps())
+            neighbourChoice = random.choice([1, 3, 5, 6, 7])
+            return (neighbourChoice, neighbourFunctions[neighbourChoice])
         else:
             # At depth > 1, must generate period moving only moves, that are consistent with the locals' constraints
-            neighbourChoice = random.choice([0, 1, 4, 5])
-            if neighbourChoice == 0:
-                # good neighbour choice
-                return (1, self.swapSpecialistTwoPeriods())
-            elif neighbourChoice == 1:
-                # excellent neighbour choice, great for optimizing at start and also after a while
-                # Generates very close neighbours, local optimization.
-                return (3, self.swapSpecialistTwoNeighbourPeriods())
-            elif neighbourChoice == 2:
-                # supposed to be bad, let's compare
-                return (4, self.swapTwoClosePeriodsPairs())
-            elif neighbourChoice == 3:
-                # supposed to be less good than 2 neighbours
-                return (5, self.swapSpecialistTwoDiagonalNeighbourPeriods())
-            elif neighbourChoice == 4:
-                # Dan Special!
-                return (6, self.swapSpecialistSameDayPeriods())
-            elif neighbourChoice == 5:
-                # Good generator
-                return (7, self.swapSpecialistPeriodsRndDaysApart())
-            elif neighbourChoice == 6:
-                # not yet implemented
-                return (8, self.multipleSwaps())
+            neighbourChoice = random.choice([1, 3, 5, 6, 7])
+            return (neighbourChoice, neighbourFunctions[neighbourChoice])
 
 
     def addOrRemoveGroupMeetingWithSpecialist(self):
@@ -718,11 +665,6 @@ class SolutionInstance:
 
             return SolutionInstance(self.classesAndResources, meetByPeriodByDayByLocalBySubjectByGroup)
 
-    def multipleSwaps(self):
-        first = self.swapSpecialistSameDayPeriods()
-#        second = first.swapSpecialistTwoPeriods()
-#        final = second.swapSpecialistTwoPeriods()
-        return first
 
     def swapTwoClosePeriodsPairs(self): # Turned out not to be a good neighbour generator
         meetByPeriodByDayByLocalBySubjectByGroup = np.copy(self.meetByPeriodByDayByLocalBySubjectByGroup)

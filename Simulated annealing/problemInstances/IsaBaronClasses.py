@@ -41,13 +41,13 @@ def isaBaronClassesInstance():
     # Dispos (temps plein pour tous sauf CISA1 et CISA2)
     enseignantTempsPleinDispos = all_period_available()
     prescoMelanieDispos = all_period_available()
-    prescoMelanieDispos[[2,7]] = False
+    prescoMelanieDispos[[2, 7]] = False
     premiereCathyDispos = all_period_available()
-    premiereCathyDispos[[4,9]] = False
+    premiereCathyDispos[[4, 9]] = False
     premiereMelanieDispos = all_period_available()
-    premiereMelanieDispos[[0,5]] = False
+    premiereMelanieDispos[[0, 5]] = False
     deuxiemeIngridDispos = all_period_available()
-    deuxiemeIngridDispos[[3,8]] = False
+    deuxiemeIngridDispos[[3, 8]] = False
     deuxEtTroisMarieClaudeDispos = all_period_available()
     deuxEtTroisMarieClaudeDispos[[0]] = False
     troisiemeIsabelleDispos = all_period_available()

@@ -72,17 +72,17 @@ def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temp
     except KeyboardInterrupt:
         pass
 
-    with open("Good_neighbour_generated.json", "w") as outfile:
+    with open("statistics/Good_neighbour_generated.json", "w") as outfile:
         outfile.write(json.dumps(goodNeighbourStats))
-    with open("Equal_neighbour_generated.json", "w") as outfile:
+    with open("statistics/Equal_neighbour_generated.json", "w") as outfile:
         outfile.write(json.dumps(equalNeighbourStats))
-    with open("Bad_neighbour_generated.json", "w") as outfile:
+    with open("statistics/Bad_neighbour_generated.json", "w") as outfile:
         outfile.write(json.dumps(badNeighbourStats))
-    with open("Real_bad_neighbour_generated.json", "w") as outfile:
+    with open("statistics/Real_bad_neighbour_generated.json", "w") as outfile:
         outfile.write(json.dumps(realBadNeighbourStats))
-    with open("No_neighbour_generated.json", "w") as outfile:
+    with open("statistics/No_neighbour_generated.json", "w") as outfile:
         outfile.write(json.dumps(noNeighbourStats))
-    with open("depths.json", "w") as outfile:
+    with open("statistics/depths.json", "w") as outfile:
         outfile.write(json.dumps(depthStats))
 
     if bestSolutionCost.isPerfect():
