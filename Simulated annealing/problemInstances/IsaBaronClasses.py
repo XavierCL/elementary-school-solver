@@ -1,10 +1,9 @@
-from classesAndResources import ClassesAndResources
-from specialist import Specialist
-from group import Group
-from local import Local
+from solver.classesAndResources import ClassesAndResources
+from solver.specialist import Specialist
+from solver.group import Group
+from solver.local import Local
 from problemInstances import school1
 import numpy as np
-
 
 def getHalfTimeTutorHardCost(solutionInstance):
     # Penalizes every time an AM where an absent tutor does not have two periods without specialist

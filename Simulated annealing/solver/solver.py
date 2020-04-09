@@ -1,4 +1,4 @@
-import solutionInstance
+import solver.solutionInstance as solutionInstance
 import time
 import numpy as np
 import random

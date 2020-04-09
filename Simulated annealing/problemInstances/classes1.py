@@ -1,6 +1,6 @@
-from classesAndResources import ClassesAndResources
-from specialist import Specialist
-from group import Group
+from solver.classesAndResources import ClassesAndResources
+from solver.specialist import Specialist
+from solver.group import Group
 from problemInstances import school1
 import numpy as np
 

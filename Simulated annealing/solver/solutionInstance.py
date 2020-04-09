@@ -1,5 +1,5 @@
 from math import floor
-from solutionCost import SolutionCost
+from solver.solutionCost import SolutionCost
 import random
 import numpy as np
 

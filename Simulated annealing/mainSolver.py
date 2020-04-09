@@ -1,5 +1,5 @@
 from problemInstances import frankClasses, IsaBaronClasses
-from solver import getSolutionInstance
+from solver.solver import getSolutionInstance
 
 if __name__ == "__main__":
     ecole_de_Frank = frankClasses.frankClassesInstance()
