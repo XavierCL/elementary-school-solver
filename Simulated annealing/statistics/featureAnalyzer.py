@@ -5,8 +5,9 @@ import numpy as np
 
 def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
     featureNameIndex = 0
+    featureNamesIter = iter(featureNames)
     neighbourTypeNames = ["+/- GroupMeetingWithSpec",
-                          "swapSpec  2P",
+                          "swapSpec 2P",
                           "swap 2Days",
                           "swapSpec 2NBR P",
                           "swap 2CloseP Pairs",
@@ -18,22 +19,20 @@ def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
     depthsData = jsonDepths.read()
     depths = json.loads(depthsData)
     jsonDepths.close()
-    colors = ['b', 'k', 'lime', 'r', 'darkorange', 'm', 'g', 'c', 'yellow']
+    colors = ['k', 'm', 'lime', 'r', 'darkorange', 'b', 'g', 'c', 'yellow']
     fig, ax = plt.subplots(nrows=2, ncols=2)
     row_index = 0
     minX = inf
     for row in ax:
         col_index = 0
         for col in row:
-            featureName = featureNames[featureNameIndex]
+            featureName = next(featureNamesIter)
             featuresFile = open(featureName + ".json", "r")
             featuresData = featuresFile.read()
             featuresFile.close()
             features = json.loads(featuresData)
             featureNameIndex += 1
-            neighbourIndex = 0
             for neighbourType, times in enumerate(features):
-
                 if len(times) == 0:
                     continue
 
@@ -63,17 +62,16 @@ def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
                 ax[row_index, col_index].set_xlabel("seconds")
                 if cumul:
                     cumulative = np.cumsum(data[:,1])
-                    col.plot(data[:,0] - minX, cumulative, label=my_label, color=colors[neighbourIndex])
+                    col.plot(data[:,0] - minX, cumulative, label=my_label, color=colors[neighbourType])
                 else:
-                    col.plot(data[:,0] - minX, data[:,1], label=my_label, color=colors[neighbourIndex])
+                    col.plot(data[:,0] - minX, data[:,1], label=my_label, color=colors[neighbourType])
                 ax[row_index, col_index].set_title(featureName)
                 ax[row_index, col_index].legend()
-                neighbourIndex += 1
             for d in depths:
                 if minX - d < 0:
                     ax[row_index, col_index].axvline(d - minX, 0, np.amax(data[:,1]), c="grey", linestyle="--")
 
-            subtitle = "Cumulative total of neighbours generated through time" if cumul else 'Neighbours generated through time'
+            subtitle = "Cumulative neighbours generated through time" if cumul else 'Neighbours generated through time'
             fig.suptitle(subtitle)
             col_index += 1
         row_index += 1
