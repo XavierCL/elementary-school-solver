@@ -95,9 +95,9 @@ class TutorialApp(App):
             return dropdownButton
 
         def createLocalDropdown(specialist, day, period):
-            dropdown = DropDown()
+            dropdown = DropDown(size_hint_x=None, width=200)
             for local in classInstance.locals:
-                localButton = Button(text=local.name, size_hint_y=None, height=30)
+                localButton = Button(text=str(local.id) + "-" + local.name, size_hint_y=None, height=30)
                 localButton.solverLocal = local
 
                 def localButtonCallback(button):
@@ -111,8 +111,8 @@ class TutorialApp(App):
 
             dropdownButton = Button(text=classInstance.locals[0].name, size_hint_x=None)
             dropdownButton.bind(on_release=lambda instance: dropdown.open(instance))
-            dropdown.bind(on_select=lambda instance, local: setattr(dropdownButton, 'text', local.name))
-            dropdownButton.width=200
+            dropdown.bind(on_select=lambda instance, local: setattr(dropdownButton, 'text', local.id))
+            dropdownButton.width=30
 
             localDropdowns[specialist][day][period] = dropdownButton
             hiddenLocalSelections[specialist][day][period] = 0
@@ -154,9 +154,7 @@ class TutorialApp(App):
             return cellLayout
 
         # Should be using a relative layout instead and place buttons manually using pixel positions
-        rootGrid = GridLayout(cols=classInstance.school.daysInCycle + 1, rows=len(classInstance.specialists)*classInstance.school.periodsInDay + classInstance.school.periodsInDay, size_hint=(None, None), size=(classInstance.school.daysInCycle*435 + 150, len(classInstance.specialists) * classInstance.school.periodsInDay * 36 + 36))
-        # rootGrid.bind(minimum_height=rootGrid.setter('height'))
-        # rootGrid.bind(minimum_width=rootGrid.setter('width'))
+        rootGrid = GridLayout(cols=classInstance.school.daysInCycle + 1, rows=len(classInstance.specialists)*classInstance.school.periodsInDay + classInstance.school.periodsInDay, size_hint=(None, None), size=(classInstance.school.daysInCycle*265 + 150, len(classInstance.specialists) * classInstance.school.periodsInDay * 36 + 36))
 
         rootGrid.add_widget(Label())
         for cycleDay in range(classInstance.school.daysInCycle):
