@@ -1,25 +1,21 @@
+from problemInstances import classes2
 from problemInstances import frankClasses
 import solver.solutionInstance as solutionInstance
 
 import numpy as np
 
+import scheduleEditor.hidding as hidding
+
 from kivy.app import App
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.stacklayout import StackLayout
 from kivy.uix.dropdown import DropDown
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivy.core.window import Window
-
-def hide_widget(wid, dohide=True):
-    if hasattr(wid, 'saved_hide_attrs'):
-        if not dohide:
-            wid.height, wid.size_hint_y, wid.opacity, wid.disabled, wid.width, wid.size_hint_x = wid.saved_hide_attrs
-            del wid.saved_hide_attrs
-    elif dohide:
-        wid.saved_hide_attrs = wid.height, wid.size_hint_y, wid.opacity, wid.disabled, wid.width, wid.size_hint_x
-        wid.height, wid.size_hint_y, wid.opacity, wid.disabled, wid.width, wid.size_hint_x = 0, None, 0, True, 0, None
 
 class TutorialApp(App):
     def build(self):
@@ -57,14 +53,14 @@ class TutorialApp(App):
         hiddenLocalSelections = [[[None for _ in range(classInstance.school.periodsInDay)] for _ in range(classInstance.school.daysInCycle)] for _ in classInstance.specialists]
 
         def createAddMeetingButton(specialist, day, period):
-            addButton = Button(text=' ')
+            addButton = Button()
 
             def addButtonCallback(button):
                 addSpecialistDayPeriodMeetingAtGroupAndLocal(specialist, day, period, hiddenGroupSelections[specialist][day][period], hiddenLocalSelections[specialist][day][period])
-                hide_widget(addButton, True)
-                hide_widget(groupDropdowns[specialist][day][period], False)
-                hide_widget(localDropdowns[specialist][day][period], False)
-                hide_widget(deleteButtons[specialist][day][period], False)
+                hidding.hide_widget(addButton, True)
+                hidding.hide_widget(groupDropdowns[specialist][day][period], False)
+                hidding.hide_widget(localDropdowns[specialist][day][period], False)
+                hidding.hide_widget(deleteButtons[specialist][day][period], False)
 
             addButton.bind(on_release=addButtonCallback)
 
@@ -75,7 +71,7 @@ class TutorialApp(App):
         def createGroupDropdown(specialist, day, period):
             dropdown = DropDown()
             for group in classInstance.groups:
-                groupButton = Button(text=group.name, size_hint_y=None, height=44)
+                groupButton = Button(text=group.name, size_hint_y=None, height=30)
                 groupButton.solverGroup = group
 
                 def groupButtonCallback(button):
@@ -87,21 +83,21 @@ class TutorialApp(App):
                 groupButton.bind(on_release=groupButtonCallback)
                 dropdown.add_widget(groupButton)
 
-            dropdownButton = Button(text=classInstance.groups[0].name)
+            dropdownButton = Button(text=classInstance.groups[0].name, size_hint_x=None)
             dropdownButton.bind(on_release=lambda instance: dropdown.open(instance))
             dropdown.bind(on_select=lambda instance, group: setattr(dropdownButton, 'text', group.name))
-            dropdownButton.size=(300, dropdownButton.size[1])
+            dropdownButton.width=200
 
             groupDropdowns[specialist][day][period] = dropdownButton
             hiddenGroupSelections[specialist][day][period] = 0
-            hide_widget(dropdownButton, True)
+            hidding.hide_widget(dropdownButton, True)
 
             return dropdownButton
 
         def createLocalDropdown(specialist, day, period):
             dropdown = DropDown()
             for local in classInstance.locals:
-                localButton = Button(text=local.name, size_hint_y=None, height=44)
+                localButton = Button(text=local.name, size_hint_y=None, height=30)
                 localButton.solverLocal = local
 
                 def localButtonCallback(button):
@@ -113,65 +109,78 @@ class TutorialApp(App):
                 localButton.bind(on_release=localButtonCallback)
                 dropdown.add_widget(localButton)
 
-            dropdownButton = Button(text=classInstance.locals[0].name)
+            dropdownButton = Button(text=classInstance.locals[0].name, size_hint_x=None)
             dropdownButton.bind(on_release=lambda instance: dropdown.open(instance))
             dropdown.bind(on_select=lambda instance, local: setattr(dropdownButton, 'text', local.name))
-            dropdownButton.size=(300, dropdownButton.size[1])
+            dropdownButton.width=200
 
             localDropdowns[specialist][day][period] = dropdownButton
             hiddenLocalSelections[specialist][day][period] = 0
-            hide_widget(dropdownButton, True)
+            hidding.hide_widget(dropdownButton, True)
 
             return dropdownButton
 
         def createDeleteMeetingButton(specialist, day, period):
-            deleteButton = Button(text='X')
+            deleteButton = Button(text='X', size_hint_x=None)
 
             def deleteButtonCallback(button):
                 removeSpecialistDayPeriodMeeting(specialist, day, period)
 
-                hide_widget(addButtons[specialist][day][period], False)
-                hide_widget(groupDropdowns[specialist][day][period], True)
-                hide_widget(localDropdowns[specialist][day][period], True)
-                hide_widget(deleteButton, True)
+                hidding.hide_widget(addButtons[specialist][day][period], False)
+                hidding.hide_widget(groupDropdowns[specialist][day][period], True)
+                hidding.hide_widget(localDropdowns[specialist][day][period], True)
+                hidding.hide_widget(deleteButton, True)
 
             deleteButton.bind(on_release=deleteButtonCallback)
-            deleteButton.size=(30, deleteButton.size[1])
+            deleteButton.width=30
 
             deleteButtons[specialist][day][period] = deleteButton
-            hide_widget(deleteButton, True)
+            hidding.hide_widget(deleteButton, True)
 
             return deleteButton
 
         def createCell(specialist, day, period):
-            cellLayout = BoxLayout()
-            cellLayout.add_widget(createAddMeetingButton(specialist, day, period))
-            cellLayout.add_widget(createGroupDropdown(specialist, day, period))
-            cellLayout.add_widget(createLocalDropdown(specialist, day, period))
-            cellLayout.add_widget(createDeleteMeetingButton(specialist, day, period))
+            addMeetingButton = createAddMeetingButton(specialist, day, period)
+            groupButton = createGroupDropdown(specialist, day, period)
+            localButton = createLocalDropdown(specialist, day, period)
+            removeMeetingButton = createDeleteMeetingButton(specialist, day, period)
+
+            cellLayout = StackLayout(size_hint_x=None, width=hidding.getHiddenAttr(groupButton, 'width') + hidding.getHiddenAttr(localButton, 'width') + hidding.getHiddenAttr(removeMeetingButton, 'width'))
+
+            cellLayout.add_widget(addMeetingButton)
+            cellLayout.add_widget(groupButton)
+            cellLayout.add_widget(localButton)
+            cellLayout.add_widget(removeMeetingButton)
             return cellLayout
 
         # Should be using a relative layout instead and place buttons manually using pixel positions
-        rootGrid = GridLayout(cols=classInstance.school.daysInCycle + 1, rows=len(classInstance.specialists)*classInstance.school.periodsInDay + classInstance.school.periodsInDay, size_hint=(None, None), size=(2000, 1000))
-        rootGrid.bind(minimum_height=rootGrid.setter('height'))
-        rootGrid.bind(minimum_width=rootGrid.setter('width'))
+        rootGrid = GridLayout(cols=classInstance.school.daysInCycle + 1, rows=len(classInstance.specialists)*classInstance.school.periodsInDay + classInstance.school.periodsInDay, size_hint=(None, None), size=(classInstance.school.daysInCycle*435 + 150, len(classInstance.specialists) * classInstance.school.periodsInDay * 36 + 36))
+        # rootGrid.bind(minimum_height=rootGrid.setter('height'))
+        # rootGrid.bind(minimum_width=rootGrid.setter('width'))
 
         rootGrid.add_widget(Label())
         for cycleDay in range(classInstance.school.daysInCycle):
-            dayLabel = Label(text=str(cycleDay + 1))
-            dayLabel.size = dayLabel.texture_size
-            rootGrid.add_widget(dayLabel)
+            dayLayout = RelativeLayout()
+            dayLabel = Label(text=str(cycleDay + 1), size_hint=(None, None), pos_hint={'center_x': 0.5, 'center_y': 0.5})
+            dayLabel.bind(texture_size=dayLabel.setter('size'))
+            dayLayout.add_widget(dayLabel)
+            rootGrid.add_widget(dayLayout)
 
         for period in range(classInstance.school.periodsInDay):
             for specialist in classInstance.specialists:
-                specialistLabel = Label(text=specialist.name)
-                specialistLabel.size = specialistLabel.texture_size
-                rootGrid.add_widget(specialistLabel)
+
+                specialistLayout = RelativeLayout(size_hint_x=(None))
+                specialistLabel = Label(text=specialist.name, size_hint=(None, None), pos_hint={'center_x': 0.5, 'center_y': 0.5})
+                specialistLabel.bind(texture_size=specialistLabel.setter('size'))
+                specialistLabel.bind(width=specialistLayout.setter('width'))
+                specialistLayout.add_widget(specialistLabel)
+                rootGrid.add_widget(specialistLayout)
+
                 for day in range(classInstance.school.daysInCycle):
                     rootGrid.add_widget(createCell(specialist.id, day, period))
             if period != classInstance.school.periodsInDay - 1:
                 for day in range(classInstance.school.daysInCycle + 1):
-                    rootGrid.add_widget(Label())
+                    rootGrid.add_widget(Label(size_hint_y=None, height=30))
 
         rootScrollViewer = ScrollView(size_hint=(None, None), size=(Window.width, Window.height))
         Window.bind(on_resize=lambda window, x, y: setattr(rootScrollViewer, 'size', (x, y)))
