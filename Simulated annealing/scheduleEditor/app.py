@@ -21,6 +21,7 @@ class TutorialApp(App):
     def build(self):
 
         # todo: Import json from a button
+        # classInstance = classes2.classes2()
         classInstance = frankClasses.frankClassesInstance()
 
         # todo: Import json from a button
@@ -95,9 +96,10 @@ class TutorialApp(App):
             return dropdownButton
 
         def createLocalDropdown(specialist, day, period):
-            dropdown = DropDown(size_hint_x=None, width=200)
+            localWidth = 400
+            dropdown = DropDown(auto_width=False, size_hint_x=None, width=localWidth)
             for local in classInstance.locals:
-                localButton = Button(text=str(local.id) + "-" + local.name, size_hint_y=None, height=30)
+                localButton = Button(text=str(local.id) + " - " + local.name, size_hint=(None, None), size=(localWidth, 30))
                 localButton.solverLocal = local
 
                 def localButtonCallback(button):
@@ -109,9 +111,9 @@ class TutorialApp(App):
                 localButton.bind(on_release=localButtonCallback)
                 dropdown.add_widget(localButton)
 
-            dropdownButton = Button(text=classInstance.locals[0].name, size_hint_x=None)
+            dropdownButton = Button(text=str(classInstance.locals[0].id), size_hint_x=None)
             dropdownButton.bind(on_release=lambda instance: dropdown.open(instance))
-            dropdown.bind(on_select=lambda instance, local: setattr(dropdownButton, 'text', local.id))
+            dropdown.bind(on_select=lambda instance, local: setattr(dropdownButton, 'text', str(local.id)))
             dropdownButton.width=30
 
             localDropdowns[specialist][day][period] = dropdownButton
