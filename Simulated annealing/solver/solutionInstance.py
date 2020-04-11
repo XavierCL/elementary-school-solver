@@ -120,13 +120,13 @@ class SolutionInstance:
         groupsSubjectPeriodsAcrossTheBoardCost = self.getGroupsSubjectsAcrossTheBoardCost()
         teachSameLevelsTogetherCost = self.getTeachSameLevelsTogetherCost(meetArgs)
 
-        return ((tutorFreePeriodsAcrossTheDaysCost * 1000 +
-                 tutorFreePeriodsAcrossThePeriodsCost * 100 +
+        return ((tutorFreePeriodsAcrossTheDaysCost +
+                 tutorFreePeriodsAcrossThePeriodsCost * 3000 +
                  tutorFreePeriodsAcrossTheBoard +
-                 groupsSubjectPeriodsAcrossThePeriodsCost +
-                 groupsSubjectPeriodsAcrossTheBoardCost * 1000 +
+                 groupsSubjectPeriodsAcrossThePeriodsCost * 10 +
+                 groupsSubjectPeriodsAcrossTheBoardCost +
                  teachSameLevelsTogetherCost * 1000
-                 ) / 1_500_000/200,
+                 ) / 800_000,
                 [tutorFreePeriodsAcrossTheDaysCost,
                  tutorFreePeriodsAcrossThePeriodsCost,
                  tutorFreePeriodsAcrossTheBoard,
@@ -264,10 +264,9 @@ class SolutionInstance:
                      self.swapSpecialistTwoDiagonalNeighbourPeriods(),
                      self.swapSpecialistSameDayPeriods(),
                      self.swapSpecialistPeriodsRndDaysApart()]
-        self.neighbourTypeCount = len(neighbourFunctions)
 
         if depth == 0:
-            neighbourChoice = random.choice([0, 1, 2, 3, 6, 7])
+            neighbourChoice = random.choice([0, 1, 2, 3, 6])
             return (neighbourChoice, neighbourFunctions[neighbourChoice])
 
         elif depth == 1:
@@ -275,7 +274,7 @@ class SolutionInstance:
             return (neighbourChoice, neighbourFunctions[neighbourChoice])
         else:
             # At depth > 1, must generate period moving only moves, that are consistent with the locals' constraints
-            neighbourChoice = random.choice([1, 3, 5, 6])
+            neighbourChoice = random.choice([1, 3, 5, 6, 7])
             return (neighbourChoice, neighbourFunctions[neighbourChoice])
 
 
@@ -501,7 +500,7 @@ class SolutionInstance:
         firstDay = possibleFirstPeriods[1][firstPeriodSwap]
         firstPeriod = possibleFirstPeriods[2][firstPeriodSwap]
 
-        randomSwitch = random.choice([1, 2, 3, 4, 5])
+        randomSwitch = random.choice([1, 2, 3, 4])
 
         minusRandomDay = (firstDay + self.meetByPeriodByDayByLocalBySubjectByGroup.shape[3] - randomSwitch) % \
                         self.meetByPeriodByDayByLocalBySubjectByGroup.shape[3]
@@ -510,8 +509,8 @@ class SolutionInstance:
                            self.meetByPeriodByDayByLocalBySubjectByGroup.shape[4]
         plusFirstPeriod = (firstPeriod + 1) % self.meetByPeriodByDayByLocalBySubjectByGroup.shape[4]
 
-        possibleSecondDays = [minusRandomDay, plusRandomDay, minusRandomDay, plusRandomDay]
-        possibleSecondPeriods = [minusFirstPeriod, minusFirstPeriod, plusFirstPeriod, plusFirstPeriod]
+        possibleSecondDays = [minusRandomDay, plusRandomDay, minusRandomDay, plusRandomDay, minusRandomDay, plusRandomDay]
+        possibleSecondPeriods = [firstPeriod, firstPeriod, minusFirstPeriod, minusFirstPeriod, plusFirstPeriod, plusFirstPeriod]
         possibleSecondPeriodsNotTeachingGroup = np.where(
             (np.sum(self.meetByPeriodByDayByLocalBySubjectByGroup[:, specialistWithSwappedGroup], axis=(0, 1)) == 0)[
                 possibleSecondDays, possibleSecondPeriods])[0]
