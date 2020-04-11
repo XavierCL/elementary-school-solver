@@ -1,4 +1,5 @@
 import sys
+import os
 import solver.solutionInstance as solutionInstance
 import solver.solutionCost as solutionCost
 import time
@@ -19,17 +20,19 @@ def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temp
                           ).astype(np.bool)
     lastSolution = solutionInstance.SolutionInstance(classesAndResources, emptyMeets)
 
+    global bestSolution
     bestSolution = lastSolution
 
     def setBestSolution(better):
+        global bestSolution
         bestSolution = better
 
     startTime = time.time() * 1000.
-    optimizeSolutionInstance(lastSolution, initialTemperature, temperatureDecreaseRate, setBestSolution, lambda: time.time() * 1000. < startTime + msToSpend, withStats)
+    optimizeSolutionInstance(lastSolution, initialTemperature, temperatureDecreaseRate, setBestSolution, lambda: time.time() * 1000. < startTime + msToSpend, startTime)
 
     return bestSolution
 
-def optimizeSolutionInstance(lastSolution: solutionInstance.SolutionInstance, initialTemperature, temperatureDecreaseRate, betterSolutionFoundCallback, shouldContinue, withStats):
+def optimizeSolutionInstance(lastSolution: solutionInstance.SolutionInstance, initialTemperature, temperatureDecreaseRate, betterSolutionFoundCallback, shouldContinue, startTime):
     bestSolution = lastSolution
     bestSolutionCost = bestSolution.getTotalCost()
 

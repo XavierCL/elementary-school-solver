@@ -762,17 +762,13 @@ class SolutionInstance:
         groupByPeriodByDayBySpecialist = np.zeros((self.meetByPeriodByDayByLocalBySubjectByGroup.shape[1],
                                                    self.meetByPeriodByDayByLocalBySubjectByGroup.shape[3],
                                                    self.meetByPeriodByDayByLocalBySubjectByGroup.shape[4]))
-        vfunc = lambda x: (floor(self.classesAndResources.groups[x].level)) + ((x + 1) / 100)
-        get_group_level_with_id = np.vectorize(vfunc)
-        groupByPeriodByDayBySpecialist[argsWhere[1], argsWhere[3], argsWhere[4]] = get_group_level_with_id(argsWhere[0])
+        groupByPeriodByDayBySpecialist[argsWhere[1], argsWhere[3], argsWhere[4]] = argsWhere[2] + (argsWhere[0] + 1) / 100
 
         specialistByPeriodByDayByGroup = np.zeros((self.meetByPeriodByDayByLocalBySubjectByGroup.shape[0],
                                                    self.meetByPeriodByDayByLocalBySubjectByGroup.shape[3],
                                                    self.meetByPeriodByDayByLocalBySubjectByGroup.shape[4]))
         specialistByPeriodByDayByGroup[argsWhere[0], argsWhere[3], argsWhere[4]] = argsWhere[1] + 1
-
-        header = "{0:<10} {1:<12} {2:<15} {3:<37} {4:<10} {5}".format("Hard 1  |", "Hard 2  |", "Soft -> details:",
-                                        "Free P across Days/Periods/Board  |", "Grouping subject", " | Same level")
+        
         return self.classesAndResources.toString() + """
 
 Groups schedules (0 = no specialist):
@@ -781,5 +777,7 @@ Groups schedules (0 = no specialist):
 
 Specialists schedules (0 = no group):
 """ + "\n".join(map(lambda indexAndX: self.classesAndResources.specialists[indexAndX[0]].name +
-                                      ":\n" + str(indexAndX[1].T), enumerate(groupByPeriodByDayBySpecialist))) + "\n\n\t\t\t\t" + header + """
-Solution cost:  """ + str(self.getTotalCost().toString())
+                                      ":\n" + str(indexAndX[1].T), enumerate(groupByPeriodByDayBySpecialist))) + """
+
+""" + SolutionCost.getDisplayHeader() + """
+""" + str(self.getTotalCost().toString())
