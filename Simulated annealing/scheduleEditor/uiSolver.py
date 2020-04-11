@@ -78,7 +78,7 @@ class UiSolver:
         self.lastSolutionCostUpdatedCallback(self._lastSolution.getTotalCost())
 
     def _runSolver(self):
-        solver.optimizeSolutionInstance(self._lastSolution, 4, 0.99765, lambda better: setattr(self, 'lastSolution', better), lambda: self._isRunning)
+        solver.optimizeSolutionInstance(self._lastSolution, 4, 0.99765, lambda better: setattr(self, 'lastSolution', better), lambda: self._isRunning, False)
 
     def _runVisualUpdater(self):
         if self._isRunning:

@@ -9,7 +9,7 @@ import json
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
-def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temperatureDecreaseRate):
+def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temperatureDecreaseRate, withStats=True):
 
     emptyMeets = np.zeros((len(classesAndResources.groups),
                            len(classesAndResources.specialists),
@@ -19,15 +19,17 @@ def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temp
                           ).astype(np.bool)
     lastSolution = solutionInstance.SolutionInstance(classesAndResources, emptyMeets)
 
-    # Using a dictionary to be able to assign it in the lambda
-    bestSolution = {"s":lastSolution}
+    bestSolution = lastSolution
+
+    def setBestSolution(better):
+        bestSolution = better
 
     startTime = time.time() * 1000.
-    optimizeSolutionInstance(lastSolution, initialTemperature, temperatureDecreaseRate, lambda betterSolution: setattr(bestSolution, 's', betterSolution), lambda: time.time() * 1000. < startTime + msToSpend)
+    optimizeSolutionInstance(lastSolution, initialTemperature, temperatureDecreaseRate, setBestSolution, lambda: time.time() * 1000. < startTime + msToSpend, withStats)
 
-    return bestSolution["s"]
+    return bestSolution
 
-def optimizeSolutionInstance(lastSolution: solutionInstance.SolutionInstance, initialTemperature, temperatureDecreaseRate, betterSolutionFoundCallback, shouldContinue):
+def optimizeSolutionInstance(lastSolution: solutionInstance.SolutionInstance, initialTemperature, temperatureDecreaseRate, betterSolutionFoundCallback, shouldContinue, withStats):
     bestSolution = lastSolution
     bestSolutionCost = bestSolution.getTotalCost()
 
@@ -73,10 +75,15 @@ def optimizeSolutionInstance(lastSolution: solutionInstance.SolutionInstance, in
                         else:
                             equalNeighbourStats[neighbourType].append(time.time())
                             selectedEqual += 1
+
                         lastSolutionCost = neighbourCost
                         lastSolution = neighbourSolution
-                        bestSolutionCost = neighbourCost
-                        bestSolution = neighbourSolution
+
+                        if neighbourCost.lowerOrEqualTo(bestSolutionCost):
+                            bestSolutionCost = neighbourCost
+                            bestSolution = neighbourSolution
+                            betterSolutionFoundCallback(bestSolution)
+
                         temperature *= temperatureDecreaseRate
                     else:
                         if neighbourCost.magnitude() == lastSolutionCost.magnitude() and random.uniform(0, 1) <= \
