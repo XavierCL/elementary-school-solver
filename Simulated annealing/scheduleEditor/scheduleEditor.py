@@ -26,13 +26,14 @@ from kivy.uix.dropdown import DropDown
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 
+import random
 
 class ScheduleEditor(App):
     def __init__(self):
         App.__init__(self)
 
         # todo: Import csv from a button
-        self.solver = uiSolver.UiSolver(classes2.classes2(), 5.0, 5.0)
+        self.solver = uiSolver.UiSolver(frankClasses.frankClassesInstance(), 10.0, 0.3)
         self.appStopped = False
 
         # todo: Import solution from csv
@@ -48,23 +49,35 @@ class ScheduleEditor(App):
         self.hiddenGroupSelections = [[[None for _ in range(self.solver.classesAndResources.school.periodsInDay)] for _ in range(self.solver.classesAndResources.school.daysInCycle)] for _ in self.solver.classesAndResources.specialists]
         self.hiddenLocalSelections = [[[None for _ in range(self.solver.classesAndResources.school.periodsInDay)] for _ in range(self.solver.classesAndResources.school.daysInCycle)] for _ in self.solver.classesAndResources.specialists]
 
+        self.periodGridIsDisabled = False
+
     def on_stop(self):
         self.appStopped = True
-        self.solver.stop()
+        self.solver.askToStop()
 
     def startSolver(self):
-        self.disablePeriodGrid(True)
+        self.periodGridIsDisabled = True
         self.solver.start()
 
     def stopSolver(self):
-        self.solver.stop()
-        self.disablePeriodGrid(False)
+        self.solver.askToStop()
+
+        # The solver will update the visible solution on the main thread, enqueueing the stop of the ui solver afterwards
+        self.queueUiSolverStopped()
+
+    @mainthread
+    def queueUiSolverStopped(self):
+        self.solver.uiStopped()
+        self.periodGridIsDisabled = False
 
     # Might be called from a worker thread, need to change the thread to the UI one to update the buttons
     @mainthread
     def updateVisualSolution(self, visualSolution: solutionInstance.SolutionInstance):
         if not self.appStopped:
             self.costLabel.text=solutionCost.SolutionCost.getDisplayHeader() + "\n" + visualSolution.getTotalCost().toString()
+
+            previousGridDisabling = self.periodGridIsDisabled
+            self.periodGridIsDisabled = False
 
             for day in range(self.solver.classesAndResources.school.daysInCycle):
                 for period in range(self.solver.classesAndResources.school.periodsInDay):
@@ -77,10 +90,38 @@ class ScheduleEditor(App):
                             self.groupsButtons[specialist.id][day][period][groupAndLocal[0][0]].trigger_action(duration=0)
                             self.localsButtons[specialist.id][day][period][groupAndLocal[1][0]].trigger_action(duration=0)
 
+            self.periodGridIsDisabled = previousGridDisabling
+
     @mainthread
     def updateVisualSolutionCost(self, visualSolutionCost: solutionCost.SolutionCost):
         if not self.appStopped:
             self.costLabel.text=solutionCost.SolutionCost.getDisplayHeader() + "\n" + visualSolutionCost.toString()
+
+    def randomizeAllCells(self):
+        if self.periodGridIsDisabled:
+            return
+
+        for day in range(self.solver.classesAndResources.school.daysInCycle):
+            for period in range(self.solver.classesAndResources.school.periodsInDay):
+                for specialist in self.solver.classesAndResources.specialists:
+                    cellState = random.choice(['active', 'inactive'])
+                    if cellState == 'active':
+                        self.addButtons[specialist.id][day][period].trigger_action(duration=0)
+                        group = random.choice(self.solver.classesAndResources.groups)
+                        self.groupsButtons[specialist.id][day][period][group.id].trigger_action(duration=0)
+                        local = random.choice(self.solver.classesAndResources.locals)
+                        self.localsButtons[specialist.id][day][period][local.id].trigger_action(duration=0)
+                    else:
+                        self.deleteButtons[specialist.id][day][period].trigger_action(duration=0)
+
+    def emptyAllCells(self):
+        if self.periodGridIsDisabled:
+            return
+
+        for day in range(self.solver.classesAndResources.school.daysInCycle):
+            for period in range(self.solver.classesAndResources.school.periodsInDay):
+                for specialist in self.solver.classesAndResources.specialists:
+                    self.deleteButtons[specialist.id][day][period].trigger_action(duration=0)
 
     def build(self):
 
@@ -110,32 +151,31 @@ class ScheduleEditor(App):
         actionView.use_separator = True
         actionView.add_widget(ActionPrevious(with_previous=False))
 
-        self.costLabel = ActionButton(text='Cost: Yet to be computed', disabled=True, font_name='RobotoMono-Regular.ttf')
-        actionView.add_widget(self.costLabel)
+        solutionGroup = ActionGroup(text='Solution', mode='spinner')
+        randomizeAllCellsButton = ActionButton(text='Randomize')
+        randomizeAllCellsButton.bind(on_release=lambda instance: self.randomizeAllCells())
+        solutionGroup.add_widget(randomizeAllCellsButton)
+        emptyAllCellsButton = ActionButton(text='Empty all')
+        emptyAllCellsButton.bind(on_release=lambda instance: self.emptyAllCells())
+        solutionGroup.add_widget(emptyAllCellsButton)
+        actionView.add_widget(solutionGroup)
 
         solverGroup = ActionGroup(text='Solver', mode='spinner')
-
         startSolverButton = ActionButton(text='Start solver')
         startSolverButton.bind(on_release=lambda instance: self.startSolver())
         solverGroup.add_widget(startSolverButton)
-
         stopSolverButton = ActionButton(text='Stop solver')
         stopSolverButton.bind(on_release=lambda instance: self.stopSolver())
         solverGroup.add_widget(stopSolverButton)
-
         actionView.add_widget(solverGroup)
+
+        self.costLabel = ActionButton(text='Cost: Yet to be computed', disabled=True, font_name='RobotoMono-Regular.ttf')
+        actionView.add_widget(self.costLabel)
 
         actionBar = ActionBar()
         actionBar.add_widget(actionView)
 
         return actionBar
-
-    def disablePeriodGrid(self, disabled=True):
-        for buttonGroup in [self.addButtons, self.groupDropdowns, self.localDropdowns, self.deleteButtons]:
-            for specialist in self.solver.classesAndResources.specialists:
-                for day in range(self.solver.classesAndResources.school.daysInCycle):
-                    for period in range(self.solver.classesAndResources.school.periodsInDay):
-                        hidding.setHiddenAttr(buttonGroup[specialist.id][day][period], 'disabled', disabled)
 
     def buildPeriodGrid(self):
 
@@ -143,6 +183,9 @@ class ScheduleEditor(App):
             addButton = Button()
 
             def addButtonCallback(button):
+                if self.periodGridIsDisabled:
+                    return
+
                 self.solver.addSpecialistDayPeriodMeetingAtGroupAndLocal(specialist, day, period, self.hiddenGroupSelections[specialist][day][period], self.hiddenLocalSelections[specialist][day][period])
                 hidding.hide_widget(addButton, True)
                 hidding.hide_widget(self.groupDropdowns[specialist][day][period], False)
@@ -171,8 +214,14 @@ class ScheduleEditor(App):
                 self.groupsButtons[specialist][day][period][group.id] = groupButton
                 dropdown.add_widget(groupButton)
 
+            def openDropdown(button):
+                if self.periodGridIsDisabled:
+                    return
+
+                dropdown.open(button)
+
             dropdownButton = Button(text=self.solver.classesAndResources.groups[0].name, size_hint_x=None)
-            dropdownButton.bind(on_release=lambda instance: dropdown.open(instance))
+            dropdownButton.bind(on_release=openDropdown)
             dropdown.bind(on_select=lambda instance, group: setattr(dropdownButton, 'text', group.name))
             dropdownButton.width=200
 
@@ -199,8 +248,14 @@ class ScheduleEditor(App):
                 self.localsButtons[specialist][day][period][local.id] = localButton
                 dropdown.add_widget(localButton)
 
+            def openDropdown(button):
+                if self.periodGridIsDisabled:
+                    return
+
+                dropdown.open(button)
+
             dropdownButton = Button(text=str(self.solver.classesAndResources.locals[0].id), size_hint_x=None)
-            dropdownButton.bind(on_release=lambda instance: dropdown.open(instance))
+            dropdownButton.bind(on_release=openDropdown)
             dropdown.bind(on_select=lambda instance, local: setattr(dropdownButton, 'text', str(local.id)))
             dropdownButton.width=30
 
@@ -214,6 +269,9 @@ class ScheduleEditor(App):
             deleteButton = Button(text='X', size_hint_x=None)
 
             def deleteButtonCallback(button):
+                if self.periodGridIsDisabled:
+                    return
+
                 self.solver.removeSpecialistDayPeriodMeeting(specialist, day, period)
 
                 hidding.hide_widget(self.addButtons[specialist][day][period], False)

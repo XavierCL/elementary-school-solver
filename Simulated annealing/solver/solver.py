@@ -18,19 +18,10 @@ def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temp
                            classesAndResources.school.daysInCycle,
                            classesAndResources.school.periodsInDay)
                           ).astype(np.bool)
-    lastSolution = solutionInstance.SolutionInstance(classesAndResources, emptyMeets)
-
-    global bestSolution
-    bestSolution = lastSolution
-
-    def setBestSolution(better):
-        global bestSolution
-        bestSolution = better
+    initialSolution = solutionInstance.SolutionInstance(classesAndResources, emptyMeets)
 
     startTime = time.time() * 1000.
-    optimizeSolutionInstance(lastSolution, initialTemperature, temperatureDecreaseRate, setBestSolution, lambda: time.time() * 1000. < startTime + msToSpend, startTime)
-
-    return bestSolution
+    return optimizeSolutionInstance(initialSolution, initialTemperature, temperatureDecreaseRate, lambda better: None, lambda: time.time() * 1000. < startTime + msToSpend, startTime)
 
 def optimizeSolutionInstance(lastSolution: solutionInstance.SolutionInstance, initialTemperature, temperatureDecreaseRate, betterSolutionFoundCallback, shouldContinue, startTime):
     bestSolution = lastSolution

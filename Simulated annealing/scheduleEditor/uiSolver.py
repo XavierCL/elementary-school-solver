@@ -19,6 +19,7 @@ class UiSolver:
         self._visualCost = self._lastSolution.getTotalCost()
 
         self._isRunning = False
+        self._shouldRun = False
         self._solverThread = None
         self._uiUpdaterTimer = None
         self._costUpdaterTimer = None
@@ -52,23 +53,28 @@ class UiSolver:
             self.lastSolutionCostUpdatedCallback(self._visualCost)
 
     def start(self):
-        if self._isRunning:
+        if self._shouldRun:
             return
 
+        self._shouldRun = True
         self._isRunning = True
         self._solverThread = threading.Thread(target=self._runSolver)
         self._solverThread.start()
         self._runVisualUpdater()
         self._runCostUpdater()
 
-    def stop(self):
-        if self._isRunning:
-            self._isRunning = False
-            self._uiUpdaterTimer.cancel()
-            self._costUpdaterTimer.cancel()
-            self._solverThread.join()
-            self._updateVisualIfLastSolutionChanged()
-            self._updateVisualCostIfLastSolutionChanged()
+    def askToStop(self):
+        if not self._shouldRun:
+            return
+
+        self._shouldRun = False
+        self._uiUpdaterTimer.cancel()
+        self._costUpdaterTimer.cancel()
+        self._solverThread.join()
+        self._updateVisualIfLastSolutionChanged()
+
+    def uiStopped(self):
+        self._isRunning = False
 
     def onVisualSolutionUpdated(self, callback):
         self.visualSolutionUpdatedCallback = callback
@@ -79,25 +85,25 @@ class UiSolver:
         self.lastSolutionCostUpdatedCallback(self._lastSolution.getTotalCost())
 
     def _runSolver(self):
-        solver.optimizeSolutionInstance(self._lastSolution, 4, 0.99765, lambda better: setattr(self, 'lastSolution', better), lambda: self._isRunning, time.time())
+        solver.optimizeSolutionInstance(self._lastSolution, 4, 0.99765, lambda better: setattr(self, '_lastSolution', better), lambda: self._shouldRun, time.time() * 1000.)
 
     def _runVisualUpdater(self):
-        if self._isRunning:
+        if self._shouldRun:
             self._updateVisualIfLastSolutionChanged()
             self._uiUpdaterTimer = threading.Timer(self.visualSolutionRefreshRateInSecond, self._runVisualUpdater)
 
             # To avoid race condition where the stop would be called before the new instantiation of the timer and after the running check is done
-            if not self._isRunning:
-                self._uiUpdaterTimer.cancel()
+            if self._shouldRun:
+                self._uiUpdaterTimer.start()
 
     def _runCostUpdater(self):
-        if self._isRunning:
+        if self._shouldRun:
             self._updateVisualCostIfLastSolutionChanged()
             self._costUpdaterTimer = threading.Timer(self.lastSolutionCostRefreshRateInSecond, self._runCostUpdater)
 
             # To avoid race condition where the stop would be called before the new instantiation of the timer and after the running check is done
-            if not self._isRunning:
-                self._costUpdaterTimer.cancel()
+            if self._shouldRun:
+                self._costUpdaterTimer.start()
 
     def _updateVisualIfLastSolutionChanged(self):
         if not self._visualSolution.equals(self._lastSolution):
