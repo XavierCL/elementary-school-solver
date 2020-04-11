@@ -259,26 +259,26 @@ class SolutionInstance:
         return groupTogetherSameYearCost**2
 
     def getNeighbour(self, depth):
-        neighbourFunctions = [self.addOrRemoveGroupMeetingWithSpecialist(),
-                     self.swapSpecialistTwoPeriods(),
-                     self.swapTwoDays(),
-                     self.swapSpecialistTwoNeighbourPeriods(),
-                     self.swapTwoClosePeriodsPairs(),
-                     self.swapSpecialistTwoDiagonalNeighbourPeriods(),
-                     self.swapSpecialistSameDayPeriods(),
-                     self.swapSpecialistPeriodsRndDaysApart()]
+        neighbourFunctions = [self.addOrRemoveGroupMeetingWithSpecialist,
+                     self.swapSpecialistTwoPeriods,
+                     self.swapTwoDays,
+                     self.swapSpecialistTwoNeighbourPeriods,
+                     self.swapTwoClosePeriodsPairs,
+                     self.swapSpecialistTwoDiagonalNeighbourPeriods,
+                     self.swapSpecialistSameDayPeriods,
+                     self.swapSpecialistPeriodsRndDaysApart]
 
         if depth == 0:
             neighbourChoice = random.choice([0, 1, 2, 3, 6])
-            return (neighbourChoice, neighbourFunctions[neighbourChoice])
+            return (neighbourChoice, neighbourFunctions[neighbourChoice]())
 
         elif depth == 1:
             neighbourChoice = random.choice([1, 3, 5, 6, 7])
-            return (neighbourChoice, neighbourFunctions[neighbourChoice])
+            return (neighbourChoice, neighbourFunctions[neighbourChoice]())
         else:
             # At depth > 1, must generate period moving only moves, that are consistent with the locals' constraints
             neighbourChoice = random.choice([1, 3, 5, 6, 7])
-            return (neighbourChoice, neighbourFunctions[neighbourChoice])
+            return (neighbourChoice, neighbourFunctions[neighbourChoice]())
 
 
     def addOrRemoveGroupMeetingWithSpecialist(self):
