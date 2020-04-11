@@ -13,6 +13,9 @@ class SolutionInstance:
         self.maxDepth = 2
         self.neighbourTypeCount = 8
 
+    def equals(self, otherSolutionInstance):
+        return np.array_equal(self.meetByPeriodByDayByLocalBySubjectByGroup, otherSolutionInstance.meetByPeriodByDayByLocalBySubjectByGroup)
+
     def assignGroupToSpecialistDayAndPeriod(self, specialist, day, period, local, oldGroupId, newGroupId):
         meetByPeriodByDayByLocalBySubjectByGroup = np.copy(self.meetByPeriodByDayByLocalBySubjectByGroup)
         meetByPeriodByDayByLocalBySubjectByGroup[[oldGroupId, newGroupId], specialist, local, day, period] = \

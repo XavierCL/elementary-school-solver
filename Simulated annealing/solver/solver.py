@@ -1,5 +1,6 @@
 import sys
 import solver.solutionInstance as solutionInstance
+import solver.solutionCost as solutionCost
 import time
 import numpy as np
 import random
@@ -7,7 +8,6 @@ import math
 import json
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
-
 
 def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temperatureDecreaseRate):
 
@@ -18,6 +18,16 @@ def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temp
                            classesAndResources.school.periodsInDay)
                           ).astype(np.bool)
     lastSolution = solutionInstance.SolutionInstance(classesAndResources, emptyMeets)
+
+    # Using a dictionary to be able to assign it in the lambda
+    bestSolution = {"s":lastSolution}
+
+    startTime = time.time() * 1000.
+    optimizeSolutionInstance(lastSolution, initialTemperature, temperatureDecreaseRate, lambda betterSolution: setattr(bestSolution, 's', betterSolution), lambda: time.time() * 1000. < startTime + msToSpend)
+
+    return bestSolution["s"]
+
+def optimizeSolutionInstance(lastSolution: solutionInstance.SolutionInstance, initialTemperature, temperatureDecreaseRate, betterSolutionFoundCallback, shouldContinue):
     bestSolution = lastSolution
     bestSolutionCost = bestSolution.getTotalCost()
 
@@ -34,17 +44,14 @@ def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temp
     selectedEqual = 0
     selectedBad = 0
     depth = 0
-    startTime = time.time() * 1000.
     printTrace = False
-    header = "{0:<10} {1:<12} {2:<15} {3:<37} {4:<10} {5}".format("Hard 1  |", "Hard 2  |", "Soft -> details:",
-                                "Free P across Days/Periods/Board  |", "Grouping subject", " | Same level")
-    print(header)
+    print(solutionCost.SolutionCost.getDisplayHeader())
     try:
-        while time.time() * 1000. < startTime + msToSpend and depth <= lastSolution.maxDepth:
+        while shouldContinue() and depth <= lastSolution.maxDepth:
             depthStats.append(time.time())
             temperature = initialTemperature
             lastSolutionCost = lastSolution.getTotalCost()
-            while time.time() * 1000. < startTime + msToSpend and not lastSolutionCost.isPerfect(depth):
+            while shouldContinue() and not lastSolutionCost.isPerfect(depth):
                 (neighbourType, neighbourSolution) = lastSolution.getNeighbour(depth)
                 generatedNeighbours += 1
                 if neighbourSolution == None:

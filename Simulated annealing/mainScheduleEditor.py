@@ -1,5 +1,3 @@
-from scheduleEditor import app
-# from scheduleEditor import layoutTest
+from scheduleEditor import scheduleEditor
 
-# layoutTest.TutorialApp().run()
-app.TutorialApp().run()
+scheduleEditor.ScheduleEditor().run()
