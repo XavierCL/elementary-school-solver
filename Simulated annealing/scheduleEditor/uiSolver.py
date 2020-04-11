@@ -1,5 +1,6 @@
 import solver.solver as solver
 import solver.solutionInstance as solutionInstance
+import time
 
 import numpy as np
 
@@ -78,7 +79,7 @@ class UiSolver:
         self.lastSolutionCostUpdatedCallback(self._lastSolution.getTotalCost())
 
     def _runSolver(self):
-        solver.optimizeSolutionInstance(self._lastSolution, 4, 0.99765, lambda better: setattr(self, 'lastSolution', better), lambda: self._isRunning, False)
+        solver.optimizeSolutionInstance(self._lastSolution, 4, 0.99765, lambda better: setattr(self, 'lastSolution', better), lambda: self._isRunning, time.time())
 
     def _runVisualUpdater(self):
         if self._isRunning:

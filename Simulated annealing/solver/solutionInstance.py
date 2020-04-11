@@ -762,7 +762,7 @@ class SolutionInstance:
         groupByPeriodByDayBySpecialist = np.zeros((self.meetByPeriodByDayByLocalBySubjectByGroup.shape[1],
                                                    self.meetByPeriodByDayByLocalBySubjectByGroup.shape[3],
                                                    self.meetByPeriodByDayByLocalBySubjectByGroup.shape[4]))
-        groupByPeriodByDayBySpecialist[argsWhere[1], argsWhere[3], argsWhere[4]] = argsWhere[2] + (argsWhere[0] + 1) / 100
+        groupByPeriodByDayBySpecialist[argsWhere[1], argsWhere[3], argsWhere[4]] = np.floor(self.classesAndResources.levelByGroup[argsWhere[0]]) + (argsWhere[0] + 1) / 100.0
 
         specialistByPeriodByDayByGroup = np.zeros((self.meetByPeriodByDayByLocalBySubjectByGroup.shape[0],
                                                    self.meetByPeriodByDayByLocalBySubjectByGroup.shape[3],
