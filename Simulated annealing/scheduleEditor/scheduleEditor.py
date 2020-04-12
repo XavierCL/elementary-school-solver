@@ -1,27 +1,19 @@
 from problemInstances import classes2
 from problemInstances import frankClasses
-
 import scheduleEditor.uiSolver as uiSolver
-
 import solver.solutionInstance as solutionInstance
 import solver.solutionCost as solutionCost
-
 import numpy as np
-
 import scheduleEditor.hidding as hidding
-
 from kivy.app import App
 from kivy.clock import mainthread
 from kivy.core.window import Window
-
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.stacklayout import StackLayout
 from kivy.uix.scrollview import ScrollView
-
 from kivy.uix.actionbar import ActionBar, ActionView, ActionPrevious, ActionGroup, ActionButton
-
 from kivy.uix.dropdown import DropDown
 from kivy.uix.button import Button
 from kivy.uix.label import Label

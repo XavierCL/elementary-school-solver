@@ -13,13 +13,14 @@ def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
                           "swap 2CloseP Pairs",
                           "swapSpec 2DiagonalP",
                           "swapSpec SameDayP",
-                          "swapSpec P Rand Days"]
+                          "swapSpec P Rand Days",
+                          "multiple swaps"]
 
     jsonDepths = open("depths.json", "r")
     depthsData = jsonDepths.read()
     depths = json.loads(depthsData)
     jsonDepths.close()
-    colors = ['k', 'm', 'lime', 'r', 'darkorange', 'b', 'g', 'c', 'yellow']
+    colors = ['k', 'darkviolet', 'lime', 'sandybrown', 'darkorange', 'b', 'g', 'c', 'r']
     fig, ax = plt.subplots(nrows=2, ncols=2)
     row_index = 0
     minX = inf
@@ -81,6 +82,6 @@ featureNames = ["Real_bad_neighbour_generated",
                 "Bad_neighbour_generated",
                 "Equal_neighbour_generated",
                 "Good_neighbour_generated"]
-cumulativeDisplay = False
+cumulativeDisplay = True
 plotNumericFeatures(featureNames, cumulativeDisplay, 150)
 plt.show()

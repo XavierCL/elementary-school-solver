@@ -11,7 +11,17 @@ class SolutionInstance:
         self.meetByPeriodByDayBySpecialistByGroup = np.sum(self.meetByPeriodByDayByLocalBySubjectByGroup, axis=2) != 0
 
         self.maxDepth = 2
-        self.neighbourTypeCount = 8
+        self.neighbourFunctions = [self.addOrRemoveGroupMeetingWithSpecialist,
+                                   self.swapSpecialistTwoPeriods,
+                                   self.swapTwoDays,
+                                   self.swapSpecialistTwoNeighbourPeriods,
+                                   self.swapTwoClosePeriodsPairs,
+                                   self.swapSpecialistTwoDiagonalNeighbourPeriods,
+                                   self.swapSpecialistSameDayPeriods,
+                                   self.swapSpecialistPeriodsRandomDaysApart,
+                                   self.multipleSwaps]
+
+        self.neighbourTypeCount = len(self.neighbourFunctions)
 
     def equals(self, otherSolutionInstance):
         return np.array_equal(self.meetByPeriodByDayByLocalBySubjectByGroup, otherSolutionInstance.meetByPeriodByDayByLocalBySubjectByGroup)
@@ -123,13 +133,13 @@ class SolutionInstance:
         groupsSubjectPeriodsAcrossTheBoardCost = self.getGroupsSubjectsAcrossTheBoardCost()
         teachSameLevelsTogetherCost = self.getTeachSameLevelsTogetherCost(meetArgs)
 
-        return ((tutorFreePeriodsAcrossTheDaysCost +
-                 tutorFreePeriodsAcrossThePeriodsCost * 3000 +
+        return ((tutorFreePeriodsAcrossTheDaysCost * 1000 +
+                 tutorFreePeriodsAcrossThePeriodsCost * 300 +
                  tutorFreePeriodsAcrossTheBoard +
                  groupsSubjectPeriodsAcrossThePeriodsCost * 10 +
                  groupsSubjectPeriodsAcrossTheBoardCost +
-                 teachSameLevelsTogetherCost * 1000
-                 ) / 800_000,
+                 teachSameLevelsTogetherCost * 100
+                 ) / 1_500_000,
                 [tutorFreePeriodsAcrossTheDaysCost,
                  tutorFreePeriodsAcrossThePeriodsCost,
                  tutorFreePeriodsAcrossTheBoard,
@@ -259,26 +269,18 @@ class SolutionInstance:
         return groupTogetherSameYearCost**2
 
     def getNeighbour(self, depth):
-        neighbourFunctions = [self.addOrRemoveGroupMeetingWithSpecialist,
-                     self.swapSpecialistTwoPeriods,
-                     self.swapTwoDays,
-                     self.swapSpecialistTwoNeighbourPeriods,
-                     self.swapTwoClosePeriodsPairs,
-                     self.swapSpecialistTwoDiagonalNeighbourPeriods,
-                     self.swapSpecialistSameDayPeriods,
-                     self.swapSpecialistPeriodsRndDaysApart]
 
         if depth == 0:
             neighbourChoice = random.choice([0, 1, 2, 3, 6])
-            return (neighbourChoice, neighbourFunctions[neighbourChoice]())
+            return (neighbourChoice, self.neighbourFunctions[neighbourChoice]())
 
         elif depth == 1:
-            neighbourChoice = random.choice([1, 3, 5, 6, 7])
-            return (neighbourChoice, neighbourFunctions[neighbourChoice]())
+            neighbourChoice = random.choice([1, 3, 5, 6, 7, 8])
+            return (neighbourChoice, self.neighbourFunctions[neighbourChoice]())
         else:
             # At depth > 1, must generate period moving only moves, that are consistent with the locals' constraints
-            neighbourChoice = random.choice([1, 3, 5, 6, 7])
-            return (neighbourChoice, neighbourFunctions[neighbourChoice]())
+            neighbourChoice = random.choice([1, 3, 5, 6, 8])
+            return (neighbourChoice, self.neighbourFunctions[neighbourChoice]())
 
 
     def addOrRemoveGroupMeetingWithSpecialist(self):
@@ -486,13 +488,26 @@ class SolutionInstance:
 
             return SolutionInstance(self.classesAndResources, meetByPeriodByDayByLocalBySubjectByGroup)
 
-    def swapSpecialistPeriodsRndDaysApart(self):
+    def multipleSwaps(self):
+        neighbourChoice = random.choice([6, 3, 6])
+        firstSwapChoice = self.neighbourFunctions[neighbourChoice]
+        firstStep = None
+        while firstStep == None:
+            firstStep = firstSwapChoice()
+        secondSwapChoice = firstStep.neighbourFunctions[neighbourChoice]
+        secondStep = secondSwapChoice()
+        if secondStep == None:
+            return None
+        meetByPeriodByDayByLocalBySubjectByGroup = np.copy(secondStep.meetByPeriodByDayByLocalBySubjectByGroup)
+        return SolutionInstance(secondStep.classesAndResources, meetByPeriodByDayByLocalBySubjectByGroup)
+
+    def swapSpecialistPeriodsRandomDaysApart(self):
         groupWithSwappedSpecialist = random.randrange(0, self.meetByPeriodByDayByLocalBySubjectByGroup.shape[0])
         groupSpecialists = np.where(
             np.sum(self.meetByPeriodByDayByLocalBySubjectByGroup[groupWithSwappedSpecialist], axis=(1, 2, 3)) > 0)[0]
 
         if len(groupSpecialists) == 0:
-            return None
+            return self
 
         specialistWithSwappedGroup = random.choice(groupSpecialists)
 
@@ -527,7 +542,7 @@ class SolutionInstance:
                             specialistWithSwappedGroup,
                             firstLocal]])[:, possibleSecondDays,possibleSecondPeriods])
         if len(possibleSecondPeriodsNotTeachingGroup) + len(possibleSecondPeriodsTeachingOtherGroups[0]) == 0:
-            return None
+            return self
 
         secondPeriodSwap = random.randrange(0, len(possibleSecondPeriodsNotTeachingGroup) + len(
             possibleSecondPeriodsTeachingOtherGroups[0]))

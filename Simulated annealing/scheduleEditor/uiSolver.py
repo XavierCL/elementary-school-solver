@@ -1,9 +1,7 @@
 import solver.solver as solver
 import solver.solutionInstance as solutionInstance
 import time
-
 import numpy as np
-
 import threading
 
 class UiSolver:
