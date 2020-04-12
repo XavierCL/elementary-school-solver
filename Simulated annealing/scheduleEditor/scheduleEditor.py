@@ -1,5 +1,5 @@
 from problemInstances import classes2
-from problemInstances import frankClasses
+from problemInstances import frankClasses, IsaBaronClasses
 import scheduleEditor.uiSolver as uiSolver
 import solver.solutionInstance as solutionInstance
 import solver.solutionCost as solutionCost
@@ -26,6 +26,7 @@ class ScheduleEditor(App):
 
         # todo: Import csv from a button
         self.solver = uiSolver.UiSolver(frankClasses.frankClassesInstance(), 10.0, 0.3)
+#        self.solver = uiSolver.UiSolver(IsaBaronClasses.isaBaronClassesInstance(), 10.0, 0.3)
         self.appStopped = False
 
         # todo: Import solution from csv

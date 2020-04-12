@@ -46,34 +46,34 @@ def frankClassesInstance():
     adaptationMariePierDispos[0] = False
 
     groups = [
-        Group(0, "Mat Annabelle", 0, np.asarray([0, 0, 1, 2, 0, 0]), enseignantTempsPleinDispos),
-        Group(1, "Mat Jo-Annie", 0, np.asarray([0, 0, 1, 2, 0, 0]), enseignantTempsPleinDispos),
-        Group(2, "Mat Nadine", 0, np.asarray([0, 0, 1, 2, 0, 0]), enseignantTempsPleinDispos),
+        Group(0, "P Annabelle", 0, np.asarray([0, 0, 1, 2, 0, 0]), enseignantTempsPleinDispos),
+        Group(1, "P Jo-Annie", 0, np.asarray([0, 0, 1, 2, 0, 0]), enseignantTempsPleinDispos),
+        Group(2, "P Nadine", 0, np.asarray([0, 0, 1, 2, 0, 0]), enseignantTempsPleinDispos),
         
-        Group(3, "1 - Marie-Ève", 1, np.asarray([2, 0, 3, 4, 0, 0]), enseignantTempsPleinDispos),
-        Group(4, "1 - Chantal", 1, np.asarray([2, 0, 3, 4, 0, 0]), enseignantTempsPleinDispos),
+        Group(3, "1e Marie-Ève", 1, np.asarray([2, 0, 3, 4, 0, 0]), enseignantTempsPleinDispos),
+        Group(4, "1e Chantal", 1, np.asarray([2, 0, 3, 4, 0, 0]), enseignantTempsPleinDispos),
         
-        Group(5, "2 - Valérie", 2, np.asarray([2, 0, 3, 4, 0, 0]), enseignantTempsPleinDispos),
-        Group(6, "2 - Josée", 2, np.asarray([2, 3, 0, 4, 0, 0]), enseignantTempsPleinDispos),
+        Group(5, "2e Valérie", 2, np.asarray([2, 0, 3, 4, 0, 0]), enseignantTempsPleinDispos),
+        Group(6, "2e Josée", 2, np.asarray([2, 3, 0, 4, 0, 0]), enseignantTempsPleinDispos),
 
-        Group(7, "3 - Karyne", 3, np.asarray([2, 3, 0, 4, 0, 0]), enseignantTempsPleinDispos),
-        Group(8, "3 - Marie", 3, np.asarray([2, 3, 0, 4, 0, 0]), enseignantTempsPleinDispos),
-        Group(9, "3 - Anne", 3, np.asarray([2, 3, 0, 0, 4, 0]), enseignantTempsPleinDispos),
+        Group(7, "3e Karyne", 3, np.asarray([2, 3, 0, 4, 0, 0]), enseignantTempsPleinDispos),
+        Group(8, "3e Marie", 3, np.asarray([2, 3, 0, 4, 0, 0]), enseignantTempsPleinDispos),
+        Group(9, "3e Anne", 3, np.asarray([2, 3, 0, 0, 4, 0]), enseignantTempsPleinDispos),
         
-        Group(10, "4 - Anne-Marie", 4, np.asarray([3, 2, 0, 4, 0, 0]), enseignantTempsPleinDispos),
-        Group(11, "4 - Karine", 4, np.asarray([3, 2, 0, 4, 0, 0]), enseignantTempsPleinDispos),
+        Group(10, "4e Anne-Marie", 4, np.asarray([3, 2, 0, 4, 0, 0]), enseignantTempsPleinDispos),
+        Group(11, "4e Karine", 4, np.asarray([3, 2, 0, 4, 0, 0]), enseignantTempsPleinDispos),
         
-        Group(12, "5 - Brigitte", 5, np.asarray([3, 2, 0, 0, 4, 0]), enseignantTempsPleinDispos),
-        Group(13, "5 - Jean-Yves", 5, np.asarray([3, 2, 0, 0, 4, 0]), enseignantTempsPleinDispos),
+        Group(12, "5e Brigitte", 5, np.asarray([3, 2, 0, 0, 4, 0]), enseignantTempsPleinDispos),
+        Group(13, "5e Jean-Yves", 5, np.asarray([3, 2, 0, 0, 4, 0]), enseignantTempsPleinDispos),
         
-        Group(14, "5 et 6 - Marie-Ève M.", 5.5, np.asarray([3, 2, 0, 0, 4, 0]), enseignantTempsPleinDispos),
+        Group(14, "5&6 M-Ève M.", 5.5, np.asarray([3, 2, 0, 0, 4, 0]), enseignantTempsPleinDispos),
 
-        Group(15, "6 - Annie", 6, np.asarray([0, 2, 0, 0, 4, 3]), enseignantTempsPleinDispos),
-        Group(16, "6 - France", 6, np.asarray([0, 2, 0, 0, 4, 3]), enseignantTempsPleinDispos),
+        Group(15, "6e Annie", 6, np.asarray([0, 2, 0, 0, 4, 3]), enseignantTempsPleinDispos),
+        Group(16, "6e France", 6, np.asarray([0, 2, 0, 0, 4, 3]), enseignantTempsPleinDispos),
 
-        Group(17, "CISA - Isabelle", 7, np.asarray([1, 2, 0, 0, 6, 0]), adaptationIsabelleDispos),
-        Group(18, "CISA - Marie-Pier", 7, np.asarray([1, 2, 0, 0, 6, 0]), adaptationMariePierDispos),
-        Group(19, "CISA - Marie-Ève C.", 7, np.asarray([1, 3, 0, 0, 5, 0]), enseignantTempsPleinDispos)
+        Group(17, "Adp Isabelle", 7, np.asarray([1, 2, 0, 0, 6, 0]), adaptationIsabelleDispos),
+        Group(18, "Adp M-Pier", 7, np.asarray([1, 2, 0, 0, 6, 0]), adaptationMariePierDispos),
+        Group(19, "Adp M-Ève C.", 7, np.asarray([1, 3, 0, 0, 5, 0]), enseignantTempsPleinDispos)
     ]
 
     englishSpecialistFreePeriods = all_period_available()
