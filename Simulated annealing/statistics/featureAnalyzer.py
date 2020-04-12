@@ -13,13 +13,15 @@ def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
                           "swap 2CloseP Pairs",
                           "swapSpec 2DiagonalP",
                           "swapSpec SameDayP",
-                          "swapSpec P Rand Days"]
+                          "swapSpec P Rand Days",
+                          "add best day",
+                          "remove best day",
+                          "swap best specialist 2p"]
 
-    jsonDepths = open("depths.json", "r")
+    jsonDepths = open("statistics/depths.json", "r")
     depthsData = jsonDepths.read()
     depths = json.loads(depthsData)
     jsonDepths.close()
-    colors = ['k', 'm', 'lime', 'r', 'darkorange', 'b', 'g', 'c', 'yellow']
     fig, ax = plt.subplots(nrows=2, ncols=2)
     row_index = 0
     minX = inf
@@ -27,7 +29,7 @@ def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
         col_index = 0
         for col in row:
             featureName = next(featureNamesIter)
-            featuresFile = open(featureName + ".json", "r")
+            featuresFile = open("statistics/" + featureName + ".json", "r")
             featuresData = featuresFile.read()
             featuresFile.close()
             features = json.loads(featuresData)
@@ -62,9 +64,9 @@ def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
                 ax[row_index, col_index].set_xlabel("seconds")
                 if cumul:
                     cumulative = np.cumsum(data[:,1])
-                    col.plot(data[:,0] - minX, cumulative, label=my_label, color=colors[neighbourType])
+                    col.plot(data[:,0] - minX, cumulative, label=my_label, color="C" + str(neighbourType))
                 else:
-                    col.plot(data[:,0] - minX, data[:,1], label=my_label, color=colors[neighbourType])
+                    col.plot(data[:,0] - minX, data[:,1], label=my_label, color="C" + str(neighbourType))
                 ax[row_index, col_index].set_title(featureName)
                 ax[row_index, col_index].legend()
             for d in depths:
@@ -81,6 +83,6 @@ featureNames = ["Real_bad_neighbour_generated",
                 "Bad_neighbour_generated",
                 "Equal_neighbour_generated",
                 "Good_neighbour_generated"]
-cumulativeDisplay = False
-plotNumericFeatures(featureNames, cumulativeDisplay, 150)
+cumulativeDisplay = True
+plotNumericFeatures(featureNames, cumulativeDisplay)
 plt.show()

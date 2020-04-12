@@ -1,8 +1,9 @@
+from solver.school import School
 import numpy as np
 
 class ClassesAndResources:
     def __init__(self, school, groups, specialists, locals, customConstraints):
-        self.school = school
+        self.school: School = school
         self.groups = groups
         self.specialists = specialists
         self.locals = locals

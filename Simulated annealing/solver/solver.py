@@ -1,7 +1,9 @@
-import sys
-import os
 import solver.solutionInstance as solutionInstance
 import solver.solutionCost as solutionCost
+import solver.neighbourGenerators.neighbourGenerator as neighbourGenerator
+
+import sys
+import os
 import time
 import numpy as np
 import random
@@ -48,7 +50,7 @@ def optimizeSolutionInstance(lastSolution: solutionInstance.SolutionInstance, in
             temperature = initialTemperature
             lastSolutionCost = lastSolution.getTotalCost()
             while shouldContinue() and not lastSolutionCost.isPerfect(depth):
-                (neighbourType, neighbourSolution) = lastSolution.getNeighbour(depth)
+                (neighbourType, neighbourSolution) = neighbourGenerator.getNeighbour(lastSolution, depth)
                 generatedNeighbours += 1
                 if neighbourSolution == None:
                     noNeighbourGenerated += 1
@@ -59,12 +61,11 @@ def optimizeSolutionInstance(lastSolution: solutionInstance.SolutionInstance, in
                         if not neighbourCost.equalsTo(lastSolutionCost):
                             selectedGood += 1
                             goodNeighbourStats[neighbourType].append(time.time())
-                            if neighbourCost.highestMagnitude() != lastSolutionCost.highestMagnitude():
-                                if printTrace:
-                                    print(neighbourCost.toString())
-                                else:
-                                    sys.stdout.flush()
-                                    sys.stdout.write(("\r" + neighbourCost.toString()))
+                            if not printTrace:
+                                sys.stdout.flush()
+                                sys.stdout.write(("\r" + neighbourCost.toString()))
+                            elif neighbourCost.highestMagnitude() != lastSolutionCost.highestMagnitude() and printTrace:
+                                print(neighbourCost.toString())
 
                         else:
                             equalNeighbourStats[neighbourType].append(time.time())
