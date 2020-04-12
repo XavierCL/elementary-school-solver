@@ -16,7 +16,8 @@ def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
                           "swapSpec P Rand Days",
                           "add best day",
                           "remove best day",
-                          "swap best specialist 2p"]
+                          "swap best specialist 2p",
+                          "multiple swaps"]
 
     jsonDepths = open("statistics/depths.json", "r")
     depthsData = jsonDepths.read()

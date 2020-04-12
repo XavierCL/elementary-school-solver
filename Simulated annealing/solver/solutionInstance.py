@@ -12,9 +12,6 @@ class SolutionInstance:
         self.meetByPeriodByDayByLocalBySubjectByGroup = meetByPeriodByDayByLocalBySubjectByGroup
         self.meetByPeriodByDayBySpecialistByGroup = np.sum(self.meetByPeriodByDayByLocalBySubjectByGroup, axis=2) != 0
 
-        self.maxDepth = 2
-        self.neighbourTypeCount = 11
-
     def equals(self, otherSolutionInstance):
         return np.array_equal(self.meetByPeriodByDayByLocalBySubjectByGroup, otherSolutionInstance.meetByPeriodByDayByLocalBySubjectByGroup)
 
@@ -127,13 +124,13 @@ class SolutionInstance:
         groupsSubjectPeriodsAcrossTheBoardCost = self.getGroupsSubjectsAcrossTheBoardCost()
         teachSameLevelsTogetherCost = self.getTeachSameLevelsTogetherCost(meetArgs)
 
-        return ((tutorFreePeriodsAcrossTheDaysCost / 1000 +
+        return ((tutorFreePeriodsAcrossTheDaysCost +
                  tutorFreePeriodsAcrossThePeriodsCost * 3000 +
                  tutorFreePeriodsAcrossTheBoard +
                  groupsSubjectPeriodsAcrossThePeriodsCost * 10 +
                  groupsSubjectPeriodsAcrossTheBoardCost +
-                 teachSameLevelsTogetherCost * 1000
-                 ) / 1_200_000,
+                 teachSameLevelsTogetherCost * 100
+                 ) / 1_500_000,
                 [tutorFreePeriodsAcrossTheDaysCost,
                  tutorFreePeriodsAcrossThePeriodsCost,
                  tutorFreePeriodsAcrossTheBoard,

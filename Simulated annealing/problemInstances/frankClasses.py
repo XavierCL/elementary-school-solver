@@ -46,34 +46,34 @@ def frankClassesInstance():
     adaptationMariePierDispos[0] = False
 
     groups = [
-        Group(0, "Présco Annabelle", 0, np.asarray([0, 0, 1, 2, 0, 0]), enseignantTempsPleinDispos),
-        Group(1, "Présco Jo-Annie", 0, np.asarray([0, 0, 1, 2, 0, 0]), enseignantTempsPleinDispos),
-        Group(2, "Présco Nadine", 0, np.asarray([0, 0, 1, 2, 0, 0]), enseignantTempsPleinDispos),
+        Group(0, "P Annabelle", 0, np.asarray([0, 0, 1, 2, 0, 0]), enseignantTempsPleinDispos),
+        Group(1, "P Jo-Annie", 0, np.asarray([0, 0, 1, 2, 0, 0]), enseignantTempsPleinDispos),
+        Group(2, "P Nadine", 0, np.asarray([0, 0, 1, 2, 0, 0]), enseignantTempsPleinDispos),
         
-        Group(3, "1 - Marie-Ève", 1, np.asarray([2, 0, 3, 4, 0, 0]), enseignantTempsPleinDispos),
-        Group(4, "1 - Chantal", 1, np.asarray([2, 0, 3, 4, 0, 0]), enseignantTempsPleinDispos),
+        Group(3, "1e Marie-Ève", 1, np.asarray([2, 0, 3, 4, 0, 0]), enseignantTempsPleinDispos),
+        Group(4, "1e Chantal", 1, np.asarray([2, 0, 3, 4, 0, 0]), enseignantTempsPleinDispos),
         
-        Group(5, "2 - Valérie", 2, np.asarray([2, 0, 3, 4, 0, 0]), enseignantTempsPleinDispos),
-        Group(6, "2 - Josée", 2, np.asarray([2, 3, 0, 4, 0, 0]), enseignantTempsPleinDispos),
+        Group(5, "2e Valérie", 2, np.asarray([2, 0, 3, 4, 0, 0]), enseignantTempsPleinDispos),
+        Group(6, "2e Josée", 2, np.asarray([2, 3, 0, 4, 0, 0]), enseignantTempsPleinDispos),
 
-        Group(7, "3 - Karyne", 3, np.asarray([2, 3, 0, 4, 0, 0]), enseignantTempsPleinDispos),
-        Group(8, "3 - Marie", 3, np.asarray([2, 3, 0, 4, 0, 0]), enseignantTempsPleinDispos),
-        Group(9, "3 - Anne", 3, np.asarray([2, 3, 0, 0, 4, 0]), enseignantTempsPleinDispos),
+        Group(7, "3e Karyne", 3, np.asarray([2, 3, 0, 4, 0, 0]), enseignantTempsPleinDispos),
+        Group(8, "3e Marie", 3, np.asarray([2, 3, 0, 4, 0, 0]), enseignantTempsPleinDispos),
+        Group(9, "3e Anne", 3, np.asarray([2, 3, 0, 0, 4, 0]), enseignantTempsPleinDispos),
         
-        Group(10, "4 - Anne-Marie", 4, np.asarray([3, 2, 0, 4, 0, 0]), enseignantTempsPleinDispos),
-        Group(11, "4 - Karine", 4, np.asarray([3, 2, 0, 4, 0, 0]), enseignantTempsPleinDispos),
+        Group(10, "4e Anne-Marie", 4, np.asarray([3, 2, 0, 4, 0, 0]), enseignantTempsPleinDispos),
+        Group(11, "4e Karine", 4, np.asarray([3, 2, 0, 4, 0, 0]), enseignantTempsPleinDispos),
         
-        Group(12, "5 - Brigitte", 5, np.asarray([3, 2, 0, 0, 4, 0]), enseignantTempsPleinDispos),
-        Group(13, "5 - Jean-Yves", 5, np.asarray([3, 2, 0, 0, 4, 0]), enseignantTempsPleinDispos),
+        Group(12, "5e Brigitte", 5, np.asarray([3, 2, 0, 0, 4, 0]), enseignantTempsPleinDispos),
+        Group(13, "5e Jean-Yves", 5, np.asarray([3, 2, 0, 0, 4, 0]), enseignantTempsPleinDispos),
         
-        Group(14, "5 et 6 - Marie-Ève M.", 5.5, np.asarray([3, 2, 0, 0, 4, 0]), enseignantTempsPleinDispos),
+        Group(14, "5&6 M-Ève M.", 5.5, np.asarray([3, 2, 0, 0, 4, 0]), enseignantTempsPleinDispos),
 
-        Group(15, "6 - Annie", 6, np.asarray([0, 2, 0, 0, 4, 3]), enseignantTempsPleinDispos),
-        Group(16, "6 - France", 6, np.asarray([0, 2, 0, 0, 4, 3]), enseignantTempsPleinDispos),
+        Group(15, "6e Annie", 6, np.asarray([0, 2, 0, 0, 4, 3]), enseignantTempsPleinDispos),
+        Group(16, "6e France", 6, np.asarray([0, 2, 0, 0, 4, 3]), enseignantTempsPleinDispos),
 
-        Group(17, "CISA - Isabelle", 7, np.asarray([1, 2, 0, 0, 6, 0]), adaptationIsabelleDispos),
-        Group(18, "CISA - Marie-Pier", 7, np.asarray([1, 2, 0, 0, 6, 0]), adaptationMariePierDispos),
-        Group(19, "CISA - Marie-Ève C.", 7, np.asarray([1, 3, 0, 0, 5, 0]), enseignantTempsPleinDispos)
+        Group(17, "Adp Isabelle", 7, np.asarray([1, 2, 0, 0, 6, 0]), adaptationIsabelleDispos),
+        Group(18, "Adp M-Pier", 7, np.asarray([1, 2, 0, 0, 6, 0]), adaptationMariePierDispos),
+        Group(19, "Adp M-Ève C.", 7, np.asarray([1, 3, 0, 0, 5, 0]), enseignantTempsPleinDispos)
     ]
 
     englishSpecialistFreePeriods = all_period_available()
@@ -101,21 +101,21 @@ def frankClassesInstance():
 
     specialists = [
         Specialist(0, "Anglais", englishSpecialistFreePeriods),
-        Specialist(1, "Frank (musique) gr06-12(Mousserons) gr13+(Alizés)", frankSpecialistFreePeriods),
-        Specialist(2, "Musique (29% gr06 et moins)", otherMusicSpecialistFreePeriods),
-        Specialist(3, "Éduc 1 (Alizés gr09 et moins)", all_period_available()),
-        Specialist(4, "Éduc 2 (Mousserons + gr3.1)", all_period_available()),
-        Specialist(5, "Science teacher (dispo J2-J8 PM, J5 AM)", scienceSpecialistFreePeriods)
+        Specialist(1, "Frank", frankSpecialistFreePeriods),
+        Specialist(2, "Musique 2", otherMusicSpecialistFreePeriods),
+        Specialist(3, "Éduc 1", all_period_available()),
+        Specialist(4, "Éduc 2", all_period_available()),
+        Specialist(5, "Science", scienceSpecialistFreePeriods)
     ]
 
     locals = [
-        Local(0, "First premise english room (Alizés)", 0, {3, 4, 5, 6, 7, 8, 9, 10, 11}, {0}),
-        Local(1, "Second premise english room (Mousserons)", 1, {12, 13, 14, 17, 18, 19}, {0}),
-        Local(2, "First premise music room (Alizés)", 0, {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, {1, 2}),
-        Local(3, "Second premise music room (Mousserons)", 1, {12, 13, 14, 15, 16, 17, 18, 19}, {1}),
-        Local(4, "First premise PE room (Alizés)", 0, {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, {3, 4}),
-        Local(5, "Second premise PE room (Mousserons)", 1, {12, 13, 14, 15, 16, 17, 18, 19}, {4}),
-        Local(6, "First premise Science room (Mousserons)", 1, {15, 16}, {5})
+        Local(0, "Anglais Alizés", 0, {3, 4, 5, 6, 7, 8, 9, 10, 11}, {0}),
+        Local(1, "Anglais Mousserons", 1, {12, 13, 14, 17, 18, 19}, {0}),
+        Local(2, "Musique Alizés", 0, {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, {1, 2}),
+        Local(3, "Musique Mousserons", 1, {12, 13, 14, 15, 16, 17, 18, 19}, {1}),
+        Local(4, "Éduc Alizés", 0, {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, {3, 4}),
+        Local(5, "Éduc Mousserons", 1, {12, 13, 14, 15, 16, 17, 18, 19}, {4}),
+        Local(6, "Science Mousserons", 1, {15, 16}, {5})
     ]
 
     return ClassesAndResources(school, groups, specialists, locals, {1: getHalfTimeTutorHardCost})

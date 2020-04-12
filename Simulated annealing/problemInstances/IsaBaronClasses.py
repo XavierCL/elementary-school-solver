@@ -56,9 +56,9 @@ def isaBaronClassesInstance():
     cinquiemeEmilieDispos[[0]] = False
 
     groups = [
-        Group(0, "Présco Emmanuelle", 0, np.asarray([2, 0, 0, 0, 0, 0]), enseignantTempsPleinDispos),
-        Group(1, "Présco Véro/Josée", 0, np.asarray([0, 2, 0, 0, 0, 0]), enseignantTempsPleinDispos),
-        Group(2, "Présco Mélanie", 0, np.asarray([0, 2, 0, 0, 0, 0]), prescoMelanieDispos),
+        Group(0, "P Emmanuelle", 0, np.asarray([2, 0, 0, 0, 0, 0]), enseignantTempsPleinDispos),
+        Group(1, "P Véro/Josée", 0, np.asarray([0, 2, 0, 0, 0, 0]), enseignantTempsPleinDispos),
+        Group(2, "P Mélanie", 0, np.asarray([0, 2, 0, 0, 0, 0]), prescoMelanieDispos),
 
         Group(3, "1e Cathy", 1, np.asarray([0, 4, 3, 0, 0, 2]), premiereCathyDispos),
         Group(4, "1e Julie", 1, np.asarray([0, 4, 3, 0, 0, 2]), enseignantTempsPleinDispos),
@@ -67,12 +67,12 @@ def isaBaronClassesInstance():
         Group(6, "2e Sandra", 2, np.asarray([4, 0, 3, 0, 0, 2]), enseignantTempsPleinDispos),
         Group(7, "2e Ingrid", 2, np.asarray([4, 0, 3, 0, 0, 2]), deuxiemeIngridDispos),
 
-        Group(8, "2-3e Marie-Claude", 2.5, np.asarray([4, 0, 3, 0, 0, 2]), deuxEtTroisMarieClaudeDispos),
+        Group(8, "2&3 M-Claude", 2.5, np.asarray([4, 0, 3, 0, 0, 2]), deuxEtTroisMarieClaudeDispos),
 
         Group(9, "3e Isabelle", 3, np.asarray([4, 0, 3, 0, 0, 2]), troisiemeIsabelleDispos),
         Group(10, "3e Lisa", 3, np.asarray([4, 0, 3, 0, 0, 2]), enseignantTempsPleinDispos),
 
-        Group(11, "3-4e Émilie", 3.5, np.asarray([0, 4, 3, 0, 0, 2]), enseignantTempsPleinDispos),
+        Group(11, "3&4 Émilie", 3.5, np.asarray([0, 4, 3, 0, 0, 2]), enseignantTempsPleinDispos),
 
         Group(12, "4e Janie", 4, np.asarray([0, 4, 3, 0, 0, 2]), enseignantTempsPleinDispos),
         Group(13, "4e Sandra", 4, np.asarray([0, 4, 3, 0, 0, 2]), enseignantTempsPleinDispos),
