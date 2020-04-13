@@ -124,11 +124,11 @@ class SolutionInstance:
         groupsSubjectPeriodsAcrossTheBoardCost = self.getGroupsSubjectsAcrossTheBoardCost()
         teachSameLevelsTogetherCost = self.getTeachSameLevelsTogetherCost(meetArgs)
 
-        return ((tutorFreePeriodsAcrossTheDaysCost +
-                 tutorFreePeriodsAcrossThePeriodsCost * 3000 +
-                 tutorFreePeriodsAcrossTheBoard +
-                 groupsSubjectPeriodsAcrossThePeriodsCost * 10 +
-                 groupsSubjectPeriodsAcrossTheBoardCost +
+        return ((tutorFreePeriodsAcrossTheDaysCost / 5 +
+                 tutorFreePeriodsAcrossThePeriodsCost * 150 +
+                 tutorFreePeriodsAcrossTheBoard / 5000 +
+                 groupsSubjectPeriodsAcrossThePeriodsCost * 5 +
+                 groupsSubjectPeriodsAcrossTheBoardCost / 20 +
                  teachSameLevelsTogetherCost * 100
                  ) / 1_500_000,
                 [tutorFreePeriodsAcrossTheDaysCost,

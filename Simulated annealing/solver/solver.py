@@ -1,6 +1,6 @@
 import solver.solutionInstance as solutionInstance
 import solver.solutionCost as solutionCost
-import solver.neighbourGenerators.neighbourGenerator as neighbourGenerator
+from solver.neighbourGenerators.neighbourGenerator import NeighbourGenerator
 
 import sys
 import os
@@ -26,14 +26,17 @@ def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temp
     return optimizeSolutionInstance(initialSolution, initialTemperature, temperatureDecreaseRate, lambda better: None, lambda: time.time() * 1000. < startTime + msToSpend, startTime)
 
 def optimizeSolutionInstance(lastSolution: solutionInstance.SolutionInstance, initialTemperature, temperatureDecreaseRate, betterSolutionFoundCallback, shouldContinue, startTime):
+
+    neighbourGenerator = NeighbourGenerator()
+
     bestSolution = lastSolution
     bestSolutionCost = bestSolution.getTotalCost()
 
-    goodNeighbourStats = [[] for _ in range(bestSolution.neighbourTypeCount)]
-    equalNeighbourStats = [[] for _ in range(bestSolution.neighbourTypeCount)]
-    badNeighbourStats = [[] for _ in range(bestSolution.neighbourTypeCount)]
-    realBadNeighbourStats = [[] for _ in range(bestSolution.neighbourTypeCount)]
-    noNeighbourStats = [[] for _ in range(bestSolution.neighbourTypeCount)]
+    goodNeighbourStats = [[] for _ in range(neighbourGenerator.neighbourTypeCount)]
+    equalNeighbourStats = [[] for _ in range(neighbourGenerator.neighbourTypeCount)]
+    badNeighbourStats = [[] for _ in range(neighbourGenerator.neighbourTypeCount)]
+    realBadNeighbourStats = [[] for _ in range(neighbourGenerator.neighbourTypeCount)]
+    noNeighbourStats = [[] for _ in range(neighbourGenerator.neighbourTypeCount)]
     depthStats = []
 
     generatedNeighbours = 0
@@ -45,7 +48,7 @@ def optimizeSolutionInstance(lastSolution: solutionInstance.SolutionInstance, in
     printTrace = False
     print(solutionCost.SolutionCost.getDisplayHeader())
     try:
-        while shouldContinue() and depth <= lastSolution.maxDepth:
+        while shouldContinue() and depth <= neighbourGenerator.maxDepth:
             depthStats.append(time.time())
             temperature = initialTemperature
             lastSolutionCost = lastSolution.getTotalCost()
