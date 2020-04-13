@@ -268,12 +268,14 @@ class SolutionInstance:
         for firstClosePeriod in range(self.classesAndResources.school.periodsInAm - 1):
             groupTogetherSameYearCost += np.sum(np.logical_or(levelByPeriodByDayBySpecialist[..., firstClosePeriod] !=
                                                 levelByPeriodByDayBySpecialist[..., firstClosePeriod + 1],
-                                                groupByPeriodByDayBySpecialist[..., firstClosePeriod] == groupByPeriodByDayBySpecialist[..., firstClosePeriod + 1]))
+                                                    np.logical_and(groupByPeriodByDayBySpecialist[..., firstClosePeriod] == groupByPeriodByDayBySpecialist[..., firstClosePeriod + 1],
+                                                        groupByPeriodByDayBySpecialist[..., firstClosePeriod] != len(self.classesAndResources.groups) + 1)))
         for firstClosePeriod in range(self.classesAndResources.school.periodsInPm - 1):
             firstClosePeriod += self.classesAndResources.school.periodsInAm
             groupTogetherSameYearCost += np.sum(np.logical_or(levelByPeriodByDayBySpecialist[..., firstClosePeriod] !=
                                                 levelByPeriodByDayBySpecialist[..., firstClosePeriod + 1],
-                                                groupByPeriodByDayBySpecialist[..., firstClosePeriod] == groupByPeriodByDayBySpecialist[..., firstClosePeriod + 1]))
+                                                    np.logical_and(groupByPeriodByDayBySpecialist[..., firstClosePeriod] == groupByPeriodByDayBySpecialist[..., firstClosePeriod + 1],
+                                                        groupByPeriodByDayBySpecialist[..., firstClosePeriod] != len(self.classesAndResources.groups) + 1)))
         return groupTogetherSameYearCost**2
 
     def toString(self):
