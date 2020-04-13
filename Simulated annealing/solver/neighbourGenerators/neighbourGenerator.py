@@ -10,6 +10,7 @@ import solver.neighbourGenerators.addBestGroupSpecialistMeeting as addBestGroupS
 import solver.neighbourGenerators.removeBestGroupSpecialistMeeting as removeBestGroupSpecialistMeeting
 import solver.neighbourGenerators.swapSpecialistTwoBestMeetings as swapSpecialistTwoBestMeetings
 import solver.neighbourGenerators.multipleSwaps as multipleSwaps
+import solver.neighbourGenerators.swapSpecialistWorstToBestMeeting as swapSpecialistWorstToBestMeeting
 
 import solver.solutionInstance as solutionInstance
 
@@ -29,7 +30,8 @@ class NeighbourGenerator:
             addBestGroupSpecialistMeeting.addBestGroupSpecialistMeeting,
             removeBestGroupSpecialistMeeting.removeBestGroupSpecialistMeeting,
             swapSpecialistTwoBestMeetings.swapSpecialistTwoBestMeetings,
-            multipleSwaps.multipleSwaps]
+            multipleSwaps.multipleSwaps,
+            swapSpecialistWorstToBestMeeting.swapSpecialistWorstToBestMeeting]
 
         self.neighbourTypeCount = len(self.neighbourFunctions)
         self.depthGenerators = [self.getDepthZeroNeighbour,
@@ -41,14 +43,14 @@ class NeighbourGenerator:
         return self.depthGenerators[depth](solutionInstance)
 
     def getDepthZeroNeighbour(self, solutionInstance: solutionInstance.SolutionInstance):
-        neighbourChoice = random.choice([1, 2, 3, 6, 8, 9] * 6 + [10])
+        neighbourChoice = random.choice([1, 2, 3, 6, 8, 9])
         return (neighbourChoice, self.neighbourFunctions[neighbourChoice](solutionInstance))
 
     def getDepthOneNeighbour(self, solutionInstance: solutionInstance.SolutionInstance):
-        neighbourChoice = random.choice([1, 3, 5, 6, 7, 11] * 6 + [10])
+        neighbourChoice = random.choice([1, 3, 5, 6, 7, 11] * 100 + [12])
         return (neighbourChoice, self.neighbourFunctions[neighbourChoice](solutionInstance))
 
     def getDepthTwoNeighbour(self, solutionInstance: solutionInstance.SolutionInstance):
         # At depth > 1, must generate period moving only moves, that are consistent with the locals' constraints
-        neighbourChoice = random.choice([1, 3, 5, 6, 7, 11] * 6 + [10])
+        neighbourChoice = random.choice([1, 3, 5, 6, 7, 11] * 100 + [12])
         return (neighbourChoice, self.neighbourFunctions[neighbourChoice](solutionInstance))

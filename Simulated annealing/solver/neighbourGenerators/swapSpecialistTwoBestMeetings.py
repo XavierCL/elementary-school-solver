@@ -3,6 +3,80 @@ import solver.solutionInstance as solutionInstance
 import numpy as np
 import random
 
+def swapSpecialistTwoBestMeetingsUsingSpecificMeeting(self: solutionInstance.SolutionInstance, group, specialist, local, day, period):
+    possibleSecondPeriodsNotTeachingGroup = np.where(
+        np.sum(self.meetByPeriodByDayByLocalBySubjectByGroup[:, specialist], axis=(0, 1)) == 0)
+    possibleSecondPeriodsTeachingOtherGroups = np.where(
+        np.concatenate([self.meetByPeriodByDayByLocalBySubjectByGroup[:group,
+                        specialist,
+                        local],
+                        self.meetByPeriodByDayByLocalBySubjectByGroup[group + 1:,
+                        specialist,
+                        local]]))
+    if len(possibleSecondPeriodsNotTeachingGroup[0]) + len(possibleSecondPeriodsTeachingOtherGroups[0]) == 0:
+        return None
+
+    bestSwap = self
+    bestSwapCost = self.getTotalCost()
+
+    shuffledIndices = list(range(len(possibleSecondPeriodsNotTeachingGroup[0]) + len(possibleSecondPeriodsTeachingOtherGroups[0])))
+    random.shuffle(shuffledIndices)
+
+    for secondPeriodSwap in shuffledIndices:
+        meetByPeriodByDayByLocalBySubjectByGroup = np.copy(self.meetByPeriodByDayByLocalBySubjectByGroup)
+
+        if secondPeriodSwap < len(possibleSecondPeriodsNotTeachingGroup[0]):
+
+            secondDay = possibleSecondPeriodsNotTeachingGroup[0][secondPeriodSwap]
+            secondPeriod = possibleSecondPeriodsNotTeachingGroup[1][secondPeriodSwap]
+
+            meetByPeriodByDayByLocalBySubjectByGroup[group,
+                                                        specialist,
+                                                        local,
+                                                        day,
+                                                        period] = False
+            meetByPeriodByDayByLocalBySubjectByGroup[group,
+                                                        specialist,
+                                                        local,
+                                                        secondDay,
+                                                        secondPeriod] = True
+
+            currentSwap = solutionInstance.SolutionInstance(self.classesAndResources, meetByPeriodByDayByLocalBySubjectByGroup)
+        else:
+            secondPeriodSwap -= len(possibleSecondPeriodsNotTeachingGroup[0])
+
+            secondGroup = possibleSecondPeriodsTeachingOtherGroups[0][secondPeriodSwap]
+
+            # Need to recalibrate extracted group
+            if secondGroup >= group:
+                secondGroup += 1
+
+            secondDay = possibleSecondPeriodsTeachingOtherGroups[1][secondPeriodSwap]
+            secondPeriod = possibleSecondPeriodsTeachingOtherGroups[2][secondPeriodSwap]
+
+            meetByPeriodByDayByLocalBySubjectByGroup[group, specialist,
+                                                        local, day, period] = False
+            meetByPeriodByDayByLocalBySubjectByGroup[group, specialist,
+                                                        local, secondDay, secondPeriod] = True
+
+            meetByPeriodByDayByLocalBySubjectByGroup[secondGroup, specialist,
+                                                        local, day, period] = True
+            meetByPeriodByDayByLocalBySubjectByGroup[secondGroup, specialist,
+                                                        local, secondDay, secondPeriod] = False
+
+            currentSwap = solutionInstance.SolutionInstance(self.classesAndResources, meetByPeriodByDayByLocalBySubjectByGroup)
+
+        currentSwapCost = currentSwap.getTotalCost()
+
+        if currentSwapCost.lowerOrEqualTo(bestSwapCost) and random.choice([0, 1, 2]) > 0:
+            bestSwap = currentSwap
+            bestSwapCost = currentSwapCost
+
+    if bestSwap is self:
+        return None
+
+    return bestSwap
+
 def swapSpecialistTwoBestMeetings(self: solutionInstance.SolutionInstance):
     groupWithSwappedSpecialist = random.randrange(0, self.meetByPeriodByDayByLocalBySubjectByGroup.shape[0])
     groupSpecialists = np.where(np.sum(
@@ -20,72 +94,4 @@ def swapSpecialistTwoBestMeetings(self: solutionInstance.SolutionInstance):
     firstDay = possibleFirstPeriods[1][firstPeriodSwap]
     firstPeriod = possibleFirstPeriods[2][firstPeriodSwap]
 
-    possibleSecondPeriodsNotTeachingGroup = np.where(
-        np.sum(self.meetByPeriodByDayByLocalBySubjectByGroup[:, specialistWithSwappedGroup], axis=(0, 1)) == 0)
-    possibleSecondPeriodsTeachingOtherGroups = np.where(
-        np.concatenate([self.meetByPeriodByDayByLocalBySubjectByGroup[:groupWithSwappedSpecialist,
-                        specialistWithSwappedGroup,
-                        firstLocal],
-                        self.meetByPeriodByDayByLocalBySubjectByGroup[groupWithSwappedSpecialist + 1:,
-                        specialistWithSwappedGroup,
-                        firstLocal]]))
-    if len(possibleSecondPeriodsNotTeachingGroup[0]) + len(possibleSecondPeriodsTeachingOtherGroups[0]) == 0:
-        return None
-
-    bestSwap = self
-    bestSwapCost = self.getTotalCost()
-
-    for secondPeriodSwap in range(len(possibleSecondPeriodsNotTeachingGroup[0]) + len(possibleSecondPeriodsTeachingOtherGroups[0])):
-        meetByPeriodByDayByLocalBySubjectByGroup = np.copy(self.meetByPeriodByDayByLocalBySubjectByGroup)
-
-        if secondPeriodSwap < len(possibleSecondPeriodsNotTeachingGroup[0]):
-
-            secondDay = possibleSecondPeriodsNotTeachingGroup[0][secondPeriodSwap]
-            secondPeriod = possibleSecondPeriodsNotTeachingGroup[1][secondPeriodSwap]
-
-            meetByPeriodByDayByLocalBySubjectByGroup[groupWithSwappedSpecialist,
-                                                        specialistWithSwappedGroup,
-                                                        firstLocal,
-                                                        firstDay,
-                                                        firstPeriod] = False
-            meetByPeriodByDayByLocalBySubjectByGroup[groupWithSwappedSpecialist,
-                                                        specialistWithSwappedGroup,
-                                                        firstLocal,
-                                                        secondDay,
-                                                        secondPeriod] = True
-
-            currentSwap = solutionInstance.SolutionInstance(self.classesAndResources, meetByPeriodByDayByLocalBySubjectByGroup)
-        else:
-            secondPeriodSwap -= len(possibleSecondPeriodsNotTeachingGroup[0])
-
-            secondGroup = possibleSecondPeriodsTeachingOtherGroups[0][secondPeriodSwap]
-
-            # Need to recalibrate extracted group
-            if secondGroup >= groupWithSwappedSpecialist:
-                secondGroup += 1
-
-            secondDay = possibleSecondPeriodsTeachingOtherGroups[1][secondPeriodSwap]
-            secondPeriod = possibleSecondPeriodsTeachingOtherGroups[2][secondPeriodSwap]
-
-            meetByPeriodByDayByLocalBySubjectByGroup[groupWithSwappedSpecialist, specialistWithSwappedGroup,
-                                                        firstLocal, firstDay, firstPeriod] = False
-            meetByPeriodByDayByLocalBySubjectByGroup[groupWithSwappedSpecialist, specialistWithSwappedGroup,
-                                                        firstLocal, secondDay, secondPeriod] = True
-
-            meetByPeriodByDayByLocalBySubjectByGroup[secondGroup, specialistWithSwappedGroup,
-                                                        firstLocal, firstDay, firstPeriod] = True
-            meetByPeriodByDayByLocalBySubjectByGroup[secondGroup, specialistWithSwappedGroup,
-                                                        firstLocal, secondDay, secondPeriod] = False
-
-            currentSwap = solutionInstance.SolutionInstance(self.classesAndResources, meetByPeriodByDayByLocalBySubjectByGroup)
-
-        currentSwapCost = currentSwap.getTotalCost()
-
-        if currentSwapCost.lowerOrEqualTo(bestSwapCost):
-            bestSwap = currentSwap
-            bestSwapCost = currentSwapCost
-
-    if bestSwap is self:
-        return None
-
-    return bestSwap
+    return swapSpecialistTwoBestMeetingsUsingSpecificMeeting(self, groupWithSwappedSpecialist, specialistWithSwappedGroup, firstLocal, firstDay, firstPeriod)
