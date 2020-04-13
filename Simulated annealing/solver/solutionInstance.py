@@ -258,17 +258,22 @@ class SolutionInstance:
                                          (self.classesAndResources.maxLevel + 1)
         levelByPeriodByDayBySpecialist[meetArgs[1], meetArgs[3], meetArgs[4]] = \
             self.classesAndResources.levelByGroup[meetArgs[0]]
+
+        groupByPeriodByDayBySpecialist = np.ones((self.meetByPeriodByDayByLocalBySubjectByGroup.shape[1],
+                                                  self.meetByPeriodByDayByLocalBySubjectByGroup.shape[3],
+                                                  self.meetByPeriodByDayByLocalBySubjectByGroup.shape[4])) * \
+                                         (len(self.classesAndResources.groups) + 1)
+        groupByPeriodByDayBySpecialist[meetArgs[1], meetArgs[3], meetArgs[4]] = meetArgs[0]
+
         for firstClosePeriod in range(self.classesAndResources.school.periodsInAm - 1):
-            groupTogetherSameYearCost += np.sum(np.logical_and(levelByPeriodByDayBySpecialist[..., firstClosePeriod] !=
+            groupTogetherSameYearCost += np.sum(np.logical_or(levelByPeriodByDayBySpecialist[..., firstClosePeriod] !=
                                                 levelByPeriodByDayBySpecialist[..., firstClosePeriod + 1],
-                                                np.logical_and(levelByPeriodByDayBySpecialist[..., firstClosePeriod] != (self.classesAndResources.maxLevel + 1),
-                                                                levelByPeriodByDayBySpecialist[..., firstClosePeriod + 1] != (self.classesAndResources.maxLevel + 1))))
+                                                groupByPeriodByDayBySpecialist[..., firstClosePeriod] == groupByPeriodByDayBySpecialist[..., firstClosePeriod + 1]))
         for firstClosePeriod in range(self.classesAndResources.school.periodsInPm - 1):
             firstClosePeriod += self.classesAndResources.school.periodsInAm
-            groupTogetherSameYearCost += np.sum(np.logical_and(levelByPeriodByDayBySpecialist[..., firstClosePeriod] !=
+            groupTogetherSameYearCost += np.sum(np.logical_or(levelByPeriodByDayBySpecialist[..., firstClosePeriod] !=
                                                 levelByPeriodByDayBySpecialist[..., firstClosePeriod + 1],
-                                                np.logical_and(levelByPeriodByDayBySpecialist[..., firstClosePeriod] != (self.classesAndResources.maxLevel + 1),
-                                                                levelByPeriodByDayBySpecialist[..., firstClosePeriod + 1] != (self.classesAndResources.maxLevel + 1))))
+                                                groupByPeriodByDayBySpecialist[..., firstClosePeriod] == groupByPeriodByDayBySpecialist[..., firstClosePeriod + 1]))
         return groupTogetherSameYearCost**2
 
     def toString(self):
