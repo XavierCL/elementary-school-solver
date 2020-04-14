@@ -260,22 +260,11 @@ class SolutionInstance:
         levelByPeriodByDayBySpecialist[meetArgs[1], meetArgs[3], meetArgs[4]] = \
             self.classesAndResources.levelByGroup[meetArgs[0]]
 
-        groupByPeriodByDayBySpecialist = np.ones((self.meetByPeriodByDayByLocalBySubjectByGroup.shape[1],
-                                                  self.meetByPeriodByDayByLocalBySubjectByGroup.shape[3],
-                                                  self.meetByPeriodByDayByLocalBySubjectByGroup.shape[4])) * \
-                                         (len(self.classesAndResources.groups) + 1)
-        groupByPeriodByDayBySpecialist[meetArgs[1], meetArgs[3], meetArgs[4]] = meetArgs[0]
-
         for firstClosePeriod in range(self.classesAndResources.school.periodsInDay - 1):
-            groupTogetherSameYearCost += np.sum(np.logical_or(levelByPeriodByDayBySpecialist[..., firstClosePeriod] !=
-                                                              levelByPeriodByDayBySpecialist[..., firstClosePeriod + 1],
-                                                              np.logical_and(groupByPeriodByDayBySpecialist[
-                                                                                 ..., firstClosePeriod] ==
-                                                                             groupByPeriodByDayBySpecialist[
-                                                                                 ..., firstClosePeriod + 1],
-                                                                             groupByPeriodByDayBySpecialist[
-                                                                                 ..., firstClosePeriod] != len(
-                                                                                 self.classesAndResources.groups) + 1)))
+            groupTogetherSameYearCost += np.sum(np.any([levelByPeriodByDayBySpecialist[..., firstClosePeriod] !=
+                                                        levelByPeriodByDayBySpecialist[..., firstClosePeriod + 1],
+                                                            levelByPeriodByDayBySpecialist[..., firstClosePeriod] == (self.classesAndResources.maxLevel + 1),
+                                                            levelByPeriodByDayBySpecialist[..., firstClosePeriod] == (self.classesAndResources.maxLevel + 1)]))
         return groupTogetherSameYearCost ** 2
 
     def toString(self):
