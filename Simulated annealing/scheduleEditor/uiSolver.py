@@ -61,6 +61,17 @@ class UiSolver:
         self._runVisualUpdater()
         self._runCostUpdater()
 
+    def optimize(self):
+        if self._shouldRun:
+            return
+
+        self._shouldRun = True
+        self._isRunning = True
+        self._solverThread = threading.Thread(target=self._optimizeSolver)
+        self._solverThread.start()
+        self._runVisualUpdater()
+        self._runCostUpdater()
+
     def askToStop(self):
         if not self._shouldRun:
             return
@@ -83,7 +94,10 @@ class UiSolver:
         self.lastSolutionCostUpdatedCallback(self._lastSolution.getTotalCost())
 
     def _runSolver(self):
-        solver.optimizeSolutionInstance(self._lastSolution, 4, 0.99765, lambda better: setattr(self, '_lastSolution', better), lambda: self._shouldRun, time.time() * 1000.)
+        solver.optimizeSolutionInstance(self._lastSolution, 4, 0.99765, lambda better: setattr(self, '_lastSolution', better), lambda: self._shouldRun, time.time() * 1000., True)
+
+    def _optimizeSolver(self):
+        solver.optimizeSolutionInstance(self._lastSolution, 0, 0.99765, lambda better: setattr(self, '_lastSolution', better), lambda: self._shouldRun, time.time() * 1000., False)
 
     def _runVisualUpdater(self):
         if self._shouldRun:

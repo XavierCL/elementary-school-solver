@@ -22,9 +22,9 @@ def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temp
     initialSolution = solutionInstance.SolutionInstance(classesAndResources, emptyMeets)
 
     startTime = time.time() * 1000.
-    return optimizeSolutionInstance(initialSolution, initialTemperature, temperatureDecreaseRate, lambda better: None, lambda: time.time() * 1000. < startTime + msToSpend, startTime)
+    return optimizeSolutionInstance(initialSolution, initialTemperature, temperatureDecreaseRate, lambda better: None, lambda: time.time() * 1000. < startTime + msToSpend, startTime, True)
 
-def optimizeSolutionInstance(lastSolution: solutionInstance.SolutionInstance, initialTemperature, temperatureDecreaseRate, betterSolutionFoundCallback, shouldContinue, startTime):
+def optimizeSolutionInstance(lastSolution: solutionInstance.SolutionInstance, initialTemperature, temperatureDecreaseRate, betterSolutionFoundCallback, shouldContinue, startTime, equalSolutionsAreDeemedBetter):
 
     neighbourGenerator = NeighbourGenerator()
 
@@ -63,27 +63,32 @@ def optimizeSolutionInstance(lastSolution: solutionInstance.SolutionInstance, in
                         if not neighbourCost.equalsTo(lastSolutionCost):
                             selectedGood += 1
                             goodNeighbourStats[neighbourType].append(time.time())
+
                             if not printTrace:
                                 sys.stdout.flush()
                                 sys.stdout.write(("\r" + neighbourCost.toString()))
                             elif neighbourCost.highestMagnitude() != lastSolutionCost.highestMagnitude() and printTrace:
                                 print(neighbourCost.toString())
 
+                            lastSolutionCost = neighbourCost
+                            lastSolution = neighbourSolution
+
                         else:
                             equalNeighbourStats[neighbourType].append(time.time())
                             selectedEqual += 1
 
-                        lastSolutionCost = neighbourCost
-                        lastSolution = neighbourSolution
+                            if equalSolutionsAreDeemedBetter:
+                                lastSolutionCost = neighbourCost
+                                lastSolution = neighbourSolution
 
-                        if neighbourCost.lowerOrEqualTo(bestSolutionCost):
+                        if neighbourCost.lowerOrEqualTo(bestSolutionCost) and (equalSolutionsAreDeemedBetter or not neighbourCost.equalsTo(bestSolutionCost)):
                             bestSolutionCost = neighbourCost
                             bestSolution = neighbourSolution
                             betterSolutionFoundCallback(bestSolution)
 
                         temperature *= temperatureDecreaseRate
                     else:
-                        if neighbourCost.magnitude() == lastSolutionCost.magnitude() and random.uniform(0, 1) <= \
+                        if neighbourCost.magnitude() == lastSolutionCost.magnitude() and temperature != 0 and random.uniform(0, 1) <= \
                                 math.e**(-(neighbourCost.highestMagnitude() -
                                            lastSolutionCost.highestMagnitude())/temperature):
                             badNeighbourStats[neighbourType].append(time.time())

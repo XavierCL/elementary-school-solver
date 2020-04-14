@@ -52,6 +52,10 @@ class ScheduleEditor(App):
         self.periodGridIsDisabled = True
         self.solver.start()
 
+    def optimize(self):
+        self.periodGridIsDisabled = True
+        self.solver.optimize()
+
     def stopSolver(self):
         self.solver.askToStop()
 
@@ -160,6 +164,9 @@ class ScheduleEditor(App):
         stopSolverButton = ActionButton(text='Stop solver')
         stopSolverButton.bind(on_release=lambda instance: self.stopSolver())
         solverGroup.add_widget(stopSolverButton)
+        optimizeButton = ActionButton(text='Optimize')
+        optimizeButton.bind(on_release=lambda instance: self.optimize())
+        solverGroup.add_widget(optimizeButton)
         actionView.add_widget(solverGroup)
 
         self.costLabel = ActionButton(text='Cost: Yet to be computed', disabled=True, font_name='RobotoMono-Regular.ttf')
