@@ -3,7 +3,6 @@ import solver.solutionCost as solutionCost
 from solver.neighbourGenerators.neighbourGenerator import NeighbourGenerator
 
 import sys
-import os
 import time
 import numpy as np
 import random

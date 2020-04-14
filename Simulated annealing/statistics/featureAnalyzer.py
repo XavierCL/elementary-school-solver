@@ -20,7 +20,8 @@ def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
                           "multiple swaps",
                           "swap worst with best"]
 
-    jsonDepths = open("statistics/depths.json", "r")
+    jsonDepths = open("depths.json", "r")
+    colors = ['k', 'm', 'lime', 'r', 'darkorange', 'b', 'g', 'c', 'gold', 'lightsalmon', 'mediumpurple', 'lightcoral']
     depthsData = jsonDepths.read()
     depths = json.loads(depthsData)
     jsonDepths.close()
@@ -31,7 +32,7 @@ def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
         col_index = 0
         for col in row:
             featureName = next(featureNamesIter)
-            featuresFile = open("statistics/" + featureName + ".json", "r")
+            featuresFile = open(featureName + ".json", "r")
             featuresData = featuresFile.read()
             featuresFile.close()
             features = json.loads(featuresData)
@@ -66,9 +67,9 @@ def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
                 ax[row_index, col_index].set_xlabel("seconds")
                 if cumul:
                     cumulative = np.cumsum(data[:,1])
-                    col.plot(data[:,0] - minX, cumulative, label=my_label, color="C" + str(neighbourType))
+                    col.plot(data[:,0] - minX, cumulative, label=my_label, color=colors[neighbourType])
                 else:
-                    col.plot(data[:,0] - minX, data[:,1], label=my_label, color="C" + str(neighbourType))
+                    col.plot(data[:,0] - minX, data[:,1], label=my_label, color=colors[neighbourType])
                 ax[row_index, col_index].set_title(featureName)
                 ax[row_index, col_index].legend()
             for d in depths:

@@ -29,17 +29,20 @@ class SolutionCost:
 
     @staticmethod
     def getDisplayHeader():
-        return "{0:<10} {1:<12} {2:<15} {3:<37} {4:<10} {5}".format("Hard 1  |", "Hard 2  |", "Soft -> details:",
-                                "Free P across Days/Periods/Board  |", "Grouping subject", " | Same level")
+        return "{0:<11}{1:<10}{2:<21}{3:<39}{4:<33}{5}".format("Classes |",
+                                                              "Rooms  |",
+                                                              "Total Cost:",
+                                                              "Spreading Free Periods Across...  |",
+                                                              "Spreading Subjects Across...   |",
+                                                              "Grouping levels")
 
     def toString(self):
-        scoresTab = "  {0:<6}|    {1:<5} |  {2:<12}-||-     {3:<10} {4:<8} {5:<11} |   {6:<8} {7:<8} |    {8:<8}".format(
+        scoresTab = "   {0:<5}|   {1:<5} |   {2:<19}Days: {3:<11}Periods: {4:<9}|   Days: {5:<10}Periods: {6:<7}|     {7:<8}".format(
             int(self.scores[0]),
             int(self.scores[1]),
             round(self.scores[2], 5),
             int(self.details[0]),
             int(self.details[1]),
-            int(self.details[2]),
             int(self.details[3]),
             int(self.details[4]),
             int(self.details[5]))

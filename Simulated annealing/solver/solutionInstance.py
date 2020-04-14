@@ -2,8 +2,6 @@ from solver.solutionCost import SolutionCost
 from solver.classesAndResources import ClassesAndResources
 
 import numpy as np
-import random
-from math import floor
 
 class SolutionInstance:
 
@@ -116,26 +114,29 @@ class SolutionInstance:
         return premiseConstraintViolationCount
 
     def getSoftConstraintCost(self, meetArgs):
-        tutorFreePeriodsAcrossTheDaysCost = self.getTutorFreePeriodsAcrossDaysCost()
-        tutorFreePeriodsAcrossThePeriodsCost = self.getTutorFreePeriodsAcrossPeriodsCost()
-        tutorFreePeriodsAcrossTheBoard = self.getTutorFreePeriodsAcrossTheBoardCost()
-        # groupsSubjectPeriodsAcrossTheDaysCost = self.getGroupsSubjectsAcrossTheDaysCost()
-        groupsSubjectPeriodsAcrossThePeriodsCost = self.getGroupsSubjectsAcrossThePeriodsCost()
-        groupsSubjectPeriodsAcrossTheBoardCost = self.getGroupsSubjectsAcrossTheBoardCost()
-        teachSameLevelsTogetherCost = self.getTeachSameLevelsTogetherCost(meetArgs)
+        spreadBreaks = 15
+        spreadSpecialties = 10
+        tutorFreePeriodsAcrossTheDaysCost = self.getTutorFreePeriodsAcrossDaysCost() * spreadBreaks
+        tutorFreePeriodsAcrossThePeriodsCost = self.getTutorFreePeriodsAcrossPeriodsCost() * spreadBreaks * 15
+#        tutorFreePeriodsAcrossTheBoard = self.getTutorFreePeriodsAcrossTheBoardCost() * 0
+        groupsSubjectPeriodsAcrossTheDaysCost = self.getGroupsSubjectsAcrossTheDaysCost() * spreadSpecialties * 1.5
+        groupsSubjectPeriodsAcrossThePeriodsCost = self.getGroupsSubjectsAcrossThePeriodsCost() * spreadSpecialties
+#        groupsSubjectPeriodsAcrossTheBoardCost = self.getGroupsSubjectsAcrossTheBoardCost() * 0
+        teachSameLevelsTogetherCost = self.getTeachSameLevelsTogetherCost(meetArgs) * 40
 
-        return ((tutorFreePeriodsAcrossTheDaysCost / 5 +
-                 tutorFreePeriodsAcrossThePeriodsCost * 150 +
-                 tutorFreePeriodsAcrossTheBoard / 5000 +
-                 groupsSubjectPeriodsAcrossThePeriodsCost * 5 +
-                 groupsSubjectPeriodsAcrossTheBoardCost / 20 +
-                 teachSameLevelsTogetherCost * 100
-                 ) / 1_500_000,
+        return ((tutorFreePeriodsAcrossTheDaysCost +
+                 tutorFreePeriodsAcrossThePeriodsCost +
+#                 tutorFreePeriodsAcrossTheBoard +
+                 groupsSubjectPeriodsAcrossTheDaysCost +
+                 groupsSubjectPeriodsAcrossThePeriodsCost +
+#                 groupsSubjectPeriodsAcrossTheBoardCost +
+                 teachSameLevelsTogetherCost
+                 ) / 24_000_000,
                 [tutorFreePeriodsAcrossTheDaysCost,
                  tutorFreePeriodsAcrossThePeriodsCost,
-                 tutorFreePeriodsAcrossTheBoard,
+                 0,
+                 groupsSubjectPeriodsAcrossTheDaysCost,
                  groupsSubjectPeriodsAcrossThePeriodsCost,
-                 groupsSubjectPeriodsAcrossTheBoardCost,
                  teachSameLevelsTogetherCost])
 
     def getTutorFreePeriodsAcrossDaysCost(self):
@@ -265,18 +266,17 @@ class SolutionInstance:
                                          (len(self.classesAndResources.groups) + 1)
         groupByPeriodByDayBySpecialist[meetArgs[1], meetArgs[3], meetArgs[4]] = meetArgs[0]
 
-        for firstClosePeriod in range(self.classesAndResources.school.periodsInAm - 1):
+        for firstClosePeriod in range(self.classesAndResources.school.periodsInDay - 1):
             groupTogetherSameYearCost += np.sum(np.logical_or(levelByPeriodByDayBySpecialist[..., firstClosePeriod] !=
-                                                levelByPeriodByDayBySpecialist[..., firstClosePeriod + 1],
-                                                    np.logical_and(groupByPeriodByDayBySpecialist[..., firstClosePeriod] == groupByPeriodByDayBySpecialist[..., firstClosePeriod + 1],
-                                                        groupByPeriodByDayBySpecialist[..., firstClosePeriod] != len(self.classesAndResources.groups) + 1)))
-        for firstClosePeriod in range(self.classesAndResources.school.periodsInPm - 1):
-            firstClosePeriod += self.classesAndResources.school.periodsInAm
-            groupTogetherSameYearCost += np.sum(np.logical_or(levelByPeriodByDayBySpecialist[..., firstClosePeriod] !=
-                                                levelByPeriodByDayBySpecialist[..., firstClosePeriod + 1],
-                                                    np.logical_and(groupByPeriodByDayBySpecialist[..., firstClosePeriod] == groupByPeriodByDayBySpecialist[..., firstClosePeriod + 1],
-                                                        groupByPeriodByDayBySpecialist[..., firstClosePeriod] != len(self.classesAndResources.groups) + 1)))
-        return groupTogetherSameYearCost**2
+                                                              levelByPeriodByDayBySpecialist[..., firstClosePeriod + 1],
+                                                              np.logical_and(groupByPeriodByDayBySpecialist[
+                                                                                 ..., firstClosePeriod] ==
+                                                                             groupByPeriodByDayBySpecialist[
+                                                                                 ..., firstClosePeriod + 1],
+                                                                             groupByPeriodByDayBySpecialist[
+                                                                                 ..., firstClosePeriod] != len(
+                                                                                 self.classesAndResources.groups) + 1)))
+        return groupTogetherSameYearCost ** 2
 
     def toString(self):
         argsWhere = np.where(self.meetByPeriodByDayByLocalBySubjectByGroup)
