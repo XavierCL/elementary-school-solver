@@ -264,7 +264,7 @@ class SolutionInstance:
             groupTogetherSameYearCost += np.sum(np.any([levelByPeriodByDayBySpecialist[..., firstClosePeriod] !=
                                                         levelByPeriodByDayBySpecialist[..., firstClosePeriod + 1],
                                                             levelByPeriodByDayBySpecialist[..., firstClosePeriod] == (self.classesAndResources.maxLevel + 1),
-                                                            levelByPeriodByDayBySpecialist[..., firstClosePeriod] == (self.classesAndResources.maxLevel + 1), axis=0]))
+                                                            levelByPeriodByDayBySpecialist[..., firstClosePeriod] == (self.classesAndResources.maxLevel + 1)], axis=0))
         return groupTogetherSameYearCost ** 2
 
     def toString(self):
