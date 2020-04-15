@@ -114,27 +114,22 @@ class SolutionInstance:
         return premiseConstraintViolationCount
 
     def getSoftConstraintCost(self, meetArgs):
-        spreadBreaks = 15
-        spreadSpecialties = 10
-        tutorFreePeriodsAcrossTheDaysCost = self.getTutorFreePeriodsAcrossDaysCost() * spreadBreaks
-        tutorFreePeriodsAcrossThePeriodsCost = self.getTutorFreePeriodsAcrossPeriodsCost() * spreadBreaks * 15
-#        tutorFreePeriodsAcrossTheBoard = self.getTutorFreePeriodsAcrossTheBoardCost() * 0
-        groupsSubjectPeriodsAcrossTheDaysCost = self.getGroupsSubjectsAcrossTheDaysCost() * spreadSpecialties * 1.5
-        groupsSubjectPeriodsAcrossThePeriodsCost = self.getGroupsSubjectsAcrossThePeriodsCost() * spreadSpecialties
-#        groupsSubjectPeriodsAcrossTheBoardCost = self.getGroupsSubjectsAcrossTheBoardCost() * 0
-        teachSameLevelsTogetherCost = self.getTeachSameLevelsTogetherCost(meetArgs) * 40
+        spreadBreaksFactor = 15
+        spreadSpecialtiesFactor = 10
+        tutorFreePeriodsAcrossTheDaysCost = self.getTutorFreePeriodsAcrossDaysCost() * spreadBreaksFactor
+        tutorFreePeriodsAcrossThePeriodsCost = self.getTutorFreePeriodsAcrossPeriodsCost() * spreadBreaksFactor * 15
+        groupsSubjectPeriodsAcrossTheDaysCost = self.getGroupsSubjectsAcrossTheDaysCost() * spreadSpecialtiesFactor * 1.5
+        groupsSubjectPeriodsAcrossThePeriodsCost = self.getGroupsSubjectsAcrossThePeriodsCost() * spreadSpecialtiesFactor
+        teachSameLevelsTogetherCost = self.getTeachSameLevelsTogetherCost(meetArgs) * 125
 
         return ((tutorFreePeriodsAcrossTheDaysCost +
                  tutorFreePeriodsAcrossThePeriodsCost +
-#                 tutorFreePeriodsAcrossTheBoard +
                  groupsSubjectPeriodsAcrossTheDaysCost +
                  groupsSubjectPeriodsAcrossThePeriodsCost +
-#                 groupsSubjectPeriodsAcrossTheBoardCost +
                  teachSameLevelsTogetherCost
-                 ) / 24_000_000,
+                 ) / 27_000_000,
                 [tutorFreePeriodsAcrossTheDaysCost,
                  tutorFreePeriodsAcrossThePeriodsCost,
-                 0,
                  groupsSubjectPeriodsAcrossTheDaysCost,
                  groupsSubjectPeriodsAcrossThePeriodsCost,
                  teachSameLevelsTogetherCost])
