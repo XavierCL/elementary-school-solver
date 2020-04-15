@@ -21,7 +21,7 @@ def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
                           "swap worst with best"]
 
     jsonDepths = open("depths.json", "r")
-    colors = ['k', 'm', 'lime', 'r', 'darkorange', 'b', 'g', 'c', 'gold', 'lightsalmon', 'mediumpurple', 'lightcoral']
+    colors = ['k', 'm', 'lime', 'r', 'darkorange', 'b', 'g', 'c', 'gold', 'lightsalmon', 'mediumpurple', 'lightcoral', 'black']
     depthsData = jsonDepths.read()
     depths = json.loads(depthsData)
     jsonDepths.close()
