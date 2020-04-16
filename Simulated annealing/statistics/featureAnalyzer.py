@@ -1,6 +1,7 @@
 import json
 from math import inf
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import numpy as np
 
 def plotCostByTime():
@@ -39,7 +40,8 @@ def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
                           "swap worst with best"]
 
     jsonDepths = open("depths.json", "r")
-    colors = ['k', 'm', 'lime', 'r', 'darkorange', 'b', 'g', 'c', 'gold', 'lightsalmon', 'mediumpurple', 'lightcoral', 'black']
+    colors = ['navy', 'm', 'lime', 'r', 'darkorange', 'royalblue', 'g', 'c',
+              'gold', 'lightsalmon', 'mediumpurple', 'lightcoral', 'k', 'pink']
     depthsData = jsonDepths.read()
     depths = json.loads(depthsData)
     jsonDepths.close()
@@ -55,6 +57,8 @@ def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
             featuresFile.close()
             features = json.loads(featuresData)
             featureNameIndex += 1
+            patches = []
+            changes = []
             for neighbourType, times in enumerate(features):
                 if len(times) == 0:
                     continue
@@ -68,9 +72,9 @@ def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
                     observationIndex+=1
 
                 numberOfChanges = len(data)
+                changes.append(numberOfChanges)
                 minX = np.amin(data[:,0]) if np.amin(data[:,0]) < minX else minX
                 maxX = np.amax(data[:,0])
-
                 if xCoupling != None:
                     couplingSize = (maxX - minX) / xCoupling
                     coupledData = np.zeros((xCoupling, 2))
@@ -86,10 +90,15 @@ def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
                 if cumul:
                     cumulative = np.cumsum(data[:,1])
                     col.plot(data[:,0] - minX, cumulative, label=my_label, color=colors[neighbourType])
+                    patches.append(mpatches.Patch(color=colors[neighbourType], label=my_label))
                 else:
                     col.plot(data[:,0] - minX, data[:,1], label=my_label, color=colors[neighbourType])
+                    patches.append(mpatches.Patch(color=colors[neighbourType], label=my_label))
+                # set handles and labels display, reverse order display
                 ax[row_index, col_index].set_title(featureName)
-                ax[row_index, col_index].legend()
+                handles, labels = ax[row_index, col_index].get_legend_handles_labels()
+                labels, handles, _ = zip(*sorted(zip(labels, patches, changes), key=lambda t: -1 * t[2]))
+                ax[row_index, col_index].legend(labels=labels, handles=handles, loc="upper left")
             for d in depths:
                 if minX - d < 0:
                     ax[row_index, col_index].axvline(d - minX, 0, np.amax(data[:,1]), c="grey", linestyle="--")

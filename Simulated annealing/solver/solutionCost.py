@@ -29,20 +29,20 @@ class SolutionCost:
 
     @staticmethod
     def getDisplayHeader():
-        return "{0:<19}{1:<19}{2:<35}{3:<31}{4}".format("Hard Constraints |",
-                                                        "Soft Constraints ->",
+        return "{0:<19}{1:<19}{2:<35}{3:<33}{4}".format("Hard Constraints |",
+                                                        "Soft Constraints -> ",
                                                         "Spreading Free Periods Across... |",
-                                                        "Spreading Subjects Across... |",
+                                                        "Spreading Subjects Across ... |",
                                                         "Levels")
 
     def toString(self):
-        scoresTab = "   {0:<5}|   {1:<5}|     {2:<18}Days: {3:<8}Periods: {4:<7}|  Days: {5:<7}Periods: {6:<6}|  {7:<8}".format(
+        scoresTab = "   {0:<5}|   {1:<5}|     {2:<18}Days: {3:<8}Periods: {4:<7} |  Days: {5:<7}Periods: {6:<6} |  {7:<8}".format(
             int(self.scores[0]),
             int(self.scores[1]),
             round(self.scores[2], 5),
-            int(self.details[0] / 14500),
-            int(self.details[1] / 3200),
-            int(self.details[2] / 5900),
-            int(self.details[3] / 75),
-            int(self.details[4] / 3500))
+            round(self.details[0] / 13500000, 3),
+            round(self.details[1] / 3100000, 3),
+            round(self.details[2] / 5500000, 3),
+            round(self.details[3] / 69000, 3),
+            round(self.details[4] / 3500000, 4))
         return scoresTab
