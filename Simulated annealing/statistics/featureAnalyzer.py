@@ -21,7 +21,7 @@ def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
                           "swap worst with best"]
 
     jsonDepths = open("depths.json", "r")
-    colors = ['k', 'm', 'lime', 'r', 'darkorange', 'b', 'g', 'c', 'gold', 'lightsalmon', 'mediumpurple', 'lightcoral', 'black']
+    colors = ['k', 'm', 'lime', 'r', 'darkorange', 'royalblue', 'g', 'c', 'gold', 'lightsalmon', 'mediumpurple', 'lightcoral', 'navy']
     depthsData = jsonDepths.read()
     depths = json.loads(depthsData)
     jsonDepths.close()
@@ -71,7 +71,7 @@ def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
                 else:
                     col.plot(data[:,0] - minX, data[:,1], label=my_label, color=colors[neighbourType])
                 ax[row_index, col_index].set_title(featureName)
-                ax[row_index, col_index].legend()
+                ax[row_index, col_index].legend(loc="upper left")
             for d in depths:
                 if minX - d < 0:
                     ax[row_index, col_index].axvline(d - minX, 0, np.amax(data[:,1]), c="grey", linestyle="--")

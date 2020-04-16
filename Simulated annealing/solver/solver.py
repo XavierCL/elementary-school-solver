@@ -11,7 +11,7 @@ import json
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
-def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temperatureDecreaseRate, withStats=True):
+def getSolutionInstance(classesAndResources, msToSpend, initialTemperature, temperatureDecreaseRate):
 
     emptyMeets = np.zeros((len(classesAndResources.groups),
                            len(classesAndResources.specialists),
