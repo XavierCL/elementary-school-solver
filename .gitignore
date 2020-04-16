@@ -11,6 +11,7 @@
 **/Real_bad_neighbour_generated.json
 **/No_neighbour_generated.json
 **/depths.json
+**/costs.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -3,6 +3,24 @@ from math import inf
 import matplotlib.pyplot as plt
 import numpy as np
 
+def plotCostByTime():
+    jsonDepths = open("depths.json", "r")
+    depthsData = jsonDepths.read()
+    depths = json.loads(depthsData)
+    jsonDepths.close()
+    costFile = open("costs.json", "r")
+    costData = costFile.read()
+    costFile.close()
+    costs = json.loads(costData)
+
+    minX = np.amin(costs[0])
+
+    for d in depths:
+        plt.axvline(d - minX, 0, np.amax(costs[1]), c="grey", linestyle="--")
+
+    plt.plot(costs[0] - minX, costs[1], color='b')
+    plt.show()
+
 def plotNumericFeatures(featureNames, cumul=True, xCoupling=None):
     featureNameIndex = 0
     featureNamesIter = iter(featureNames)
@@ -87,5 +105,6 @@ featureNames = ["Real_bad_neighbour_generated",
                 "Equal_neighbour_generated",
                 "Good_neighbour_generated"]
 cumulativeDisplay = True
-plotNumericFeatures(featureNames, cumulativeDisplay)
+# plotNumericFeatures(featureNames, cumulativeDisplay)
+plotCostByTime()
 plt.show()

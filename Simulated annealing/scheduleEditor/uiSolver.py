@@ -94,7 +94,7 @@ class UiSolver:
         self.lastSolutionCostUpdatedCallback(self._lastSolution.getTotalCost())
 
     def _runSolver(self):
-        solver.optimizeSolutionInstance(self._lastSolution, 4, 0.99765, lambda better: setattr(self, '_lastSolution', better), lambda: self._shouldRun, time.time() * 1000., True)
+        solver.optimizeSolutionInstance(self._lastSolution, 0.02, 0.9998, lambda better: setattr(self, '_lastSolution', better), lambda: self._shouldRun, time.time() * 1000., True)
 
     def _optimizeSolver(self):
         solver.optimizeSolutionInstance(self._lastSolution, 0, 0.99765, lambda better: setattr(self, '_lastSolution', better), lambda: self._shouldRun, time.time() * 1000., False)

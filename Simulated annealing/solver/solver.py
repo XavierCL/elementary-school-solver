@@ -29,7 +29,7 @@ def optimizeSolutionInstance(lastSolution: solutionInstance.SolutionInstance, in
     neighbourGenerator = NeighbourGenerator()
 
     bestSolution = lastSolution
-    bestSolutionCost = bestSolution.getTotalCost()
+    bestSolutionCost: solutionCost.SolutionCost = bestSolution.getTotalCost()
 
     goodNeighbourStats = [[] for _ in range(neighbourGenerator.neighbourTypeCount)]
     equalNeighbourStats = [[] for _ in range(neighbourGenerator.neighbourTypeCount)]
@@ -37,6 +37,7 @@ def optimizeSolutionInstance(lastSolution: solutionInstance.SolutionInstance, in
     realBadNeighbourStats = [[] for _ in range(neighbourGenerator.neighbourTypeCount)]
     noNeighbourStats = [[] for _ in range(neighbourGenerator.neighbourTypeCount)]
     depthStats = []
+    costStats = [[], []]
 
     generatedNeighbours = 0
     noNeighbourGenerated = 0
@@ -73,6 +74,9 @@ def optimizeSolutionInstance(lastSolution: solutionInstance.SolutionInstance, in
                             lastSolutionCost = neighbourCost
                             lastSolution = neighbourSolution
 
+                            costStats[0].append(time.time())
+                            costStats[1].append(lastSolutionCost.highestMagnitude())
+
                         else:
                             equalNeighbourStats[neighbourType].append(time.time())
                             selectedEqual += 1
@@ -80,6 +84,9 @@ def optimizeSolutionInstance(lastSolution: solutionInstance.SolutionInstance, in
                             if equalSolutionsAreDeemedBetter:
                                 lastSolutionCost = neighbourCost
                                 lastSolution = neighbourSolution
+
+                                costStats[0].append(time.time())
+                                costStats[1].append(lastSolutionCost.highestMagnitude())
 
                         if neighbourCost.lowerOrEqualTo(bestSolutionCost) and (equalSolutionsAreDeemedBetter or not neighbourCost.equalsTo(bestSolutionCost)):
                             bestSolutionCost = neighbourCost
@@ -103,6 +110,10 @@ def optimizeSolutionInstance(lastSolution: solutionInstance.SolutionInstance, in
 
                             lastSolutionCost = neighbourCost
                             lastSolution = neighbourSolution
+
+                            costStats[0].append(time.time())
+                            costStats[1].append(lastSolutionCost.highestMagnitude())
+
                             selectedBad += 1
                             temperature *= temperatureDecreaseRate
                         else:
@@ -123,6 +134,8 @@ def optimizeSolutionInstance(lastSolution: solutionInstance.SolutionInstance, in
         outfile.write(json.dumps(noNeighbourStats))
     with open("statistics/depths.json", "w") as outfile:
         outfile.write(json.dumps(depthStats))
+    with open("statistics/costs.json", "w") as outfile:
+        outfile.write(json.dumps(costStats))
 
     if bestSolutionCost.isPerfect():
         print("\nOPTIMAL FOUND after " + str(time.time() * 1000. - startTime) + "ms\n")
