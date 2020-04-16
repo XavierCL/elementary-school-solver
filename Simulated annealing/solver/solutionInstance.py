@@ -127,7 +127,7 @@ class SolutionInstance:
                  groupsSubjectPeriodsAcrossTheDaysCost +
                  groupsSubjectPeriodsAcrossThePeriodsCost +
                  teachSameLevelsTogetherCost
-                 ) / 27_000_000,
+                 ) / 26_000_000,
                 [tutorFreePeriodsAcrossTheDaysCost,
                  tutorFreePeriodsAcrossThePeriodsCost,
                  groupsSubjectPeriodsAcrossTheDaysCost,
