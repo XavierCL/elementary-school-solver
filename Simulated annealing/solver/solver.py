@@ -45,7 +45,7 @@ def optimizeSolutionInstance(lastSolution: solutionInstance.SolutionInstance, in
     selectedEqual = 0
     selectedBad = 0
     depth = 0
-    printTrace = False
+    printTrace = True
     print(solutionCost.SolutionCost.getDisplayHeader())
     try:
         while shouldContinue() and depth <= neighbourGenerator.maxDepth:
@@ -69,6 +69,7 @@ def optimizeSolutionInstance(lastSolution: solutionInstance.SolutionInstance, in
                                 sys.stdout.write(("\r" + neighbourCost.toString()))
                             elif neighbourCost.highestMagnitude() != lastSolutionCost.highestMagnitude() and printTrace:
                                 print(neighbourCost.toString())
+                                print(time.time() * 1000. - startTime) #TODO here
 
                         else:
                             equalNeighbourStats[neighbourType].append(time.time())
@@ -92,6 +93,7 @@ def optimizeSolutionInstance(lastSolution: solutionInstance.SolutionInstance, in
                             if neighbourCost.highestMagnitude() != lastSolutionCost.highestMagnitude():
                                 if printTrace:
                                     print(neighbourCost.toString())
+                                    print(time.time() * 1000. - startTime)  # TODO here
                                 else:
                                     sys.stdout.flush()
                                     sys.stdout.write(("\r" + neighbourCost.toString()))

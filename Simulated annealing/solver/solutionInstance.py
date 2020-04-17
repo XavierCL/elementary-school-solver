@@ -63,7 +63,7 @@ class SolutionInstance:
         hardConstraintViolationCount += self.groupNeedsHardConstraintViolationCost()
         hardConstraintViolationCount += self.singleSpecialistByGroupPeriodViolationCost()
         hardConstraintViolationCount += self.singleGroupByFreeSpecialistPeriodViolationCost()
-        hardConstraintViolationCount += self.singleLocalOccupancyViolationCost()
+        # hardConstraintViolationCount += self.singleLocalOccupancyViolationCost()
 
         # Locals only see groups and specialists they are supposed to
         # Expected not to happen by neighbour generation
@@ -116,27 +116,29 @@ class SolutionInstance:
         return premiseConstraintViolationCount
 
     def getSoftConstraintCost(self, meetArgs):
-        tutorFreePeriodsAcrossTheDaysCost = self.getTutorFreePeriodsAcrossDaysCost()
-        tutorFreePeriodsAcrossThePeriodsCost = self.getTutorFreePeriodsAcrossPeriodsCost()
-        tutorFreePeriodsAcrossTheBoard = self.getTutorFreePeriodsAcrossTheBoardCost()
-        # groupsSubjectPeriodsAcrossTheDaysCost = self.getGroupsSubjectsAcrossTheDaysCost()
-        groupsSubjectPeriodsAcrossThePeriodsCost = self.getGroupsSubjectsAcrossThePeriodsCost()
-        groupsSubjectPeriodsAcrossTheBoardCost = self.getGroupsSubjectsAcrossTheBoardCost()
+        # tutorFreePeriodsAcrossTheDaysCost = self.getTutorFreePeriodsAcrossDaysCost()
+        # tutorFreePeriodsAcrossThePeriodsCost = self.getTutorFreePeriodsAcrossPeriodsCost()
+        # tutorFreePeriodsAcrossTheBoard = self.getTutorFreePeriodsAcrossTheBoardCost()
+        # # groupsSubjectPeriodsAcrossTheDaysCost = self.getGroupsSubjectsAcrossTheDaysCost()
+        # groupsSubjectPeriodsAcrossThePeriodsCost = self.getGroupsSubjectsAcrossThePeriodsCost()
+        # groupsSubjectPeriodsAcrossTheBoardCost = self.getGroupsSubjectsAcrossTheBoardCost()
         teachSameLevelsTogetherCost = self.getTeachSameLevelsTogetherCost(meetArgs)
 
-        return ((tutorFreePeriodsAcrossTheDaysCost / 5 +
-                 tutorFreePeriodsAcrossThePeriodsCost * 150 +
-                 tutorFreePeriodsAcrossTheBoard / 5000 +
-                 groupsSubjectPeriodsAcrossThePeriodsCost * 5 +
-                 groupsSubjectPeriodsAcrossTheBoardCost / 20 +
-                 teachSameLevelsTogetherCost * 100
-                 ) / 1_500_000,
-                [tutorFreePeriodsAcrossTheDaysCost,
-                 tutorFreePeriodsAcrossThePeriodsCost,
-                 tutorFreePeriodsAcrossTheBoard,
-                 groupsSubjectPeriodsAcrossThePeriodsCost,
-                 groupsSubjectPeriodsAcrossTheBoardCost,
-                 teachSameLevelsTogetherCost])
+        return (teachSameLevelsTogetherCost, [teachSameLevelsTogetherCost])
+
+        # return ((tutorFreePeriodsAcrossTheDaysCost / 5 +
+        #          tutorFreePeriodsAcrossThePeriodsCost * 150 +
+        #          tutorFreePeriodsAcrossTheBoard / 5000 +
+        #          groupsSubjectPeriodsAcrossThePeriodsCost * 5 +
+        #          groupsSubjectPeriodsAcrossTheBoardCost / 20 +
+        #          teachSameLevelsTogetherCost * 100
+        #          ) / 1_500_000,
+        #         [tutorFreePeriodsAcrossTheDaysCost,
+        #          tutorFreePeriodsAcrossThePeriodsCost,
+        #          tutorFreePeriodsAcrossTheBoard,
+        #          groupsSubjectPeriodsAcrossThePeriodsCost,
+        #          groupsSubjectPeriodsAcrossTheBoardCost,
+        #          teachSameLevelsTogetherCost])
 
     def getTutorFreePeriodsAcrossDaysCost(self):
         # Disperse a tutor free periods across the days
@@ -258,18 +260,28 @@ class SolutionInstance:
                                          (self.classesAndResources.maxLevel + 1)
         levelByPeriodByDayBySpecialist[meetArgs[1], meetArgs[3], meetArgs[4]] = \
             self.classesAndResources.levelByGroup[meetArgs[0]]
-        for firstClosePeriod in range(self.classesAndResources.school.periodsInAm - 1):
+
+        #Cout ssi les 2 périodes sont des vrais cours et d'un niveau différent
+        for firstClosePeriod in range(self.classesAndResources.school.periodsInDay - 1):
             groupTogetherSameYearCost += np.sum(np.logical_and(levelByPeriodByDayBySpecialist[..., firstClosePeriod] !=
                                                 levelByPeriodByDayBySpecialist[..., firstClosePeriod + 1],
                                                 np.logical_and(levelByPeriodByDayBySpecialist[..., firstClosePeriod] != (self.classesAndResources.maxLevel + 1),
                                                                 levelByPeriodByDayBySpecialist[..., firstClosePeriod + 1] != (self.classesAndResources.maxLevel + 1))))
-        for firstClosePeriod in range(self.classesAndResources.school.periodsInPm - 1):
-            firstClosePeriod += self.classesAndResources.school.periodsInAm
-            groupTogetherSameYearCost += np.sum(np.logical_and(levelByPeriodByDayBySpecialist[..., firstClosePeriod] !=
-                                                levelByPeriodByDayBySpecialist[..., firstClosePeriod + 1],
-                                                np.logical_and(levelByPeriodByDayBySpecialist[..., firstClosePeriod] != (self.classesAndResources.maxLevel + 1),
-                                                                levelByPeriodByDayBySpecialist[..., firstClosePeriod + 1] != (self.classesAndResources.maxLevel + 1))))
-        return groupTogetherSameYearCost**2
+        #AM et PM
+        # for firstClosePeriod in range(self.classesAndResources.school.periodsInAm - 1):
+        #     groupTogetherSameYearCost += np.sum(np.logical_and(levelByPeriodByDayBySpecialist[..., firstClosePeriod] !=
+        #                                         levelByPeriodByDayBySpecialist[..., firstClosePeriod + 1],
+        #                                         np.logical_and(levelByPeriodByDayBySpecialist[..., firstClosePeriod] != (self.classesAndResources.maxLevel + 1),
+        #                                                         levelByPeriodByDayBySpecialist[..., firstClosePeriod + 1] != (self.classesAndResources.maxLevel + 1))))
+        # for firstClosePeriod in range(self.classesAndResources.school.periodsInPm - 1):
+        #     firstClosePeriod += self.classesAndResources.school.periodsInAm
+        #     groupTogetherSameYearCost += np.sum(np.logical_and(levelByPeriodByDayBySpecialist[..., firstClosePeriod] !=
+        #                                         levelByPeriodByDayBySpecialist[..., firstClosePeriod + 1],
+        #                                         np.logical_and(levelByPeriodByDayBySpecialist[..., firstClosePeriod] != (self.classesAndResources.maxLevel + 1),
+        #                                                         levelByPeriodByDayBySpecialist[..., firstClosePeriod + 1] != (self.classesAndResources.maxLevel + 1))))
+
+        return groupTogetherSameYearCost
+        # return groupTogetherSameYearCost**2
 
     def toString(self):
         argsWhere = np.where(self.meetByPeriodByDayByLocalBySubjectByGroup)
