@@ -47,15 +47,17 @@ class SolutionInstance:
 
         meetArgs = np.where(self.meetByPeriodByDayByLocalBySubjectByGroup)
 
-        premiseConstraintViolationCount = self.getPremiseConstraintCost(meetArgs)
-        customPremiseCost = self.classesAndResources.getDepthCost(self, 1)
+        # premiseConstraintViolationCount = self.getPremiseConstraintCost(meetArgs)
+        # customPremiseCost = self.classesAndResources.getDepthCost(self, 1)
 
         (softiesConstraintViolationCount, softiesDetails) = self.getSoftConstraintCost(meetArgs)
-        customSoftCost = self.classesAndResources.getDepthCost(self, 2)
+        # customSoftCost = self.classesAndResources.getDepthCost(self, 2)
 
         return SolutionCost(np.asarray([hardConstraintViolationCount + customHardCost,
-                                        premiseConstraintViolationCount + customPremiseCost,
-                                        softiesConstraintViolationCount + customSoftCost]),
+                                        # premiseConstraintViolationCount + customPremiseCost,
+                                        softiesConstraintViolationCount
+                                        # + customSoftCost
+                                        ]),
                             softiesDetails)
 
     def getHardConstraintCost(self):
@@ -63,7 +65,7 @@ class SolutionInstance:
         hardConstraintViolationCount += self.groupNeedsHardConstraintViolationCost()
         hardConstraintViolationCount += self.singleSpecialistByGroupPeriodViolationCost()
         hardConstraintViolationCount += self.singleGroupByFreeSpecialistPeriodViolationCost()
-        hardConstraintViolationCount += self.singleLocalOccupancyViolationCost()
+        # hardConstraintViolationCount += self.singleLocalOccupancyViolationCost()
 
         # Locals only see groups and specialists they are supposed to
         # Expected not to happen by neighbour generation
@@ -116,27 +118,28 @@ class SolutionInstance:
         return premiseConstraintViolationCount
 
     def getSoftConstraintCost(self, meetArgs):
-        tutorFreePeriodsAcrossTheDaysCost = self.getTutorFreePeriodsAcrossDaysCost()
-        tutorFreePeriodsAcrossThePeriodsCost = self.getTutorFreePeriodsAcrossPeriodsCost()
-        tutorFreePeriodsAcrossTheBoard = self.getTutorFreePeriodsAcrossTheBoardCost()
-        # groupsSubjectPeriodsAcrossTheDaysCost = self.getGroupsSubjectsAcrossTheDaysCost()
-        groupsSubjectPeriodsAcrossThePeriodsCost = self.getGroupsSubjectsAcrossThePeriodsCost()
+        # tutorFreePeriodsAcrossTheDaysCost = self.getTutorFreePeriodsAcrossDaysCost()
+        # tutorFreePeriodsAcrossThePeriodsCost = self.getTutorFreePeriodsAcrossPeriodsCost()
+        # tutorFreePeriodsAcrossTheBoard = self.getTutorFreePeriodsAcrossTheBoardCost()
+        ## groupsSubjectPeriodsAcrossTheDaysCost = self.getGroupsSubjectsAcrossTheDaysCost()
+        # groupsSubjectPeriodsAcrossThePeriodsCost = self.getGroupsSubjectsAcrossThePeriodsCost()
         groupsSubjectPeriodsAcrossTheBoardCost = self.getGroupsSubjectsAcrossTheBoardCost()
-        teachSameLevelsTogetherCost = self.getTeachSameLevelsTogetherCost(meetArgs)
+        # teachSameLevelsTogetherCost = self.getTeachSameLevelsTogetherCost(meetArgs)
+        return (groupsSubjectPeriodsAcrossTheBoardCost,[groupsSubjectPeriodsAcrossTheBoardCost])
 
-        return ((tutorFreePeriodsAcrossTheDaysCost / 5 +
-                 tutorFreePeriodsAcrossThePeriodsCost * 150 +
-                 tutorFreePeriodsAcrossTheBoard / 5000 +
-                 groupsSubjectPeriodsAcrossThePeriodsCost * 5 +
-                 groupsSubjectPeriodsAcrossTheBoardCost / 20 +
-                 teachSameLevelsTogetherCost * 100
-                 ) / 1_500_000,
-                [tutorFreePeriodsAcrossTheDaysCost,
-                 tutorFreePeriodsAcrossThePeriodsCost,
-                 tutorFreePeriodsAcrossTheBoard,
-                 groupsSubjectPeriodsAcrossThePeriodsCost,
-                 groupsSubjectPeriodsAcrossTheBoardCost,
-                 teachSameLevelsTogetherCost])
+        # return ((tutorFreePeriodsAcrossTheDaysCost / 5 +
+        #          tutorFreePeriodsAcrossThePeriodsCost * 150 +
+        #          tutorFreePeriodsAcrossTheBoard / 5000 +
+        #          groupsSubjectPeriodsAcrossThePeriodsCost * 5 +
+        #          groupsSubjectPeriodsAcrossTheBoardCost / 20 +
+        #          teachSameLevelsTogetherCost * 100
+        #          ) / 1_500_000,
+        #         [tutorFreePeriodsAcrossTheDaysCost,
+        #          tutorFreePeriodsAcrossThePeriodsCost,
+        #          tutorFreePeriodsAcrossTheBoard,
+        #          groupsSubjectPeriodsAcrossThePeriodsCost,
+        #          groupsSubjectPeriodsAcrossTheBoardCost,
+        #          teachSameLevelsTogetherCost])
 
     def getTutorFreePeriodsAcrossDaysCost(self):
         # Disperse a tutor free periods across the days
