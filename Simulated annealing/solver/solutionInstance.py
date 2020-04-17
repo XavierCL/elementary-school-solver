@@ -116,18 +116,18 @@ class SolutionInstance:
     def getSoftConstraintCost(self, meetArgs):
         spreadBreaksFactor = 15
         spreadSpecialtiesFactor = 10
-        tutorFreePeriodsAcrossTheDaysCost = self.getTutorFreePeriodsAcrossDaysCost() * spreadBreaksFactor
-        tutorFreePeriodsAcrossThePeriodsCost = self.getTutorFreePeriodsAcrossPeriodsCost() * spreadBreaksFactor * 15
-        groupsSubjectPeriodsAcrossTheDaysCost = self.getGroupsSubjectsAcrossTheDaysCost() * spreadSpecialtiesFactor * 1.5
-        groupsSubjectPeriodsAcrossThePeriodsCost = self.getGroupsSubjectsAcrossThePeriodsCost() * spreadSpecialtiesFactor
-        teachSameLevelsTogetherCost = self.getTeachSameLevelsTogetherCost(meetArgs) * 125
+        globalDiviser = 26_000_000
+        tutorFreePeriodsAcrossTheDaysCost = self.getTutorFreePeriodsAcrossDaysCost() * spreadBreaksFactor / globalDiviser
+        tutorFreePeriodsAcrossThePeriodsCost = self.getTutorFreePeriodsAcrossPeriodsCost() * spreadBreaksFactor * 15 / globalDiviser
+        groupsSubjectPeriodsAcrossTheDaysCost = self.getGroupsSubjectsAcrossTheDaysCost() * spreadSpecialtiesFactor * 1.5 / globalDiviser
+        groupsSubjectPeriodsAcrossThePeriodsCost = self.getGroupsSubjectsAcrossThePeriodsCost() * spreadSpecialtiesFactor / globalDiviser
+        teachSameLevelsTogetherCost = self.getTeachSameLevelsTogetherCost(meetArgs) * 125 / globalDiviser
 
         return ((tutorFreePeriodsAcrossTheDaysCost +
                  tutorFreePeriodsAcrossThePeriodsCost +
                  groupsSubjectPeriodsAcrossTheDaysCost +
                  groupsSubjectPeriodsAcrossThePeriodsCost +
-                 teachSameLevelsTogetherCost
-                 ) / 26_000_000,
+                 teachSameLevelsTogetherCost),
                 [tutorFreePeriodsAcrossTheDaysCost,
                  tutorFreePeriodsAcrossThePeriodsCost,
                  groupsSubjectPeriodsAcrossTheDaysCost,

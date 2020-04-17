@@ -40,9 +40,9 @@ class SolutionCost:
             int(self.scores[0]),
             int(self.scores[1]),
             round(self.scores[2], 5),
-            round(self.details[0] / 13500000, 3),
-            round(self.details[1] / 3100000, 3),
-            round(self.details[2] / 5500000, 3),
-            round(self.details[3] / 69000, 3),
-            round(self.details[4] / 3500000, 4))
+            round(self.details[0], 3),
+            round(self.details[1], 3),
+            round(self.details[2], 3),
+            round(self.details[3], 3),
+            round(self.details[4], 4))
         return scoresTab
