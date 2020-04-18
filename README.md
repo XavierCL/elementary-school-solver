@@ -3,5 +3,5 @@ To launch the ui software, you must first install kivi https://kivy.org/doc/stab
 
 # Launch
 
-The file `Simulated Annealing/mainScheduleEditor.py` will start the ui software
-The file `Simulated Annealing/mainSolver.py` will start the solver. You can change the initial parameters direcly in the `mainSolver.py` file.
+* The file `Simulated Annealing/mainScheduleEditor.py` will start the ui software
+* The file `Simulated Annealing/mainSolver.py` will start the solver. You can change the initial parameters direcly in the `mainSolver.py` file.
